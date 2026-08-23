@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rag_system"
+name = "ragsystem"
 version = "0.1.0"
 description = "A Python project for parsing and handling various file types."
 
@@ -18,8 +18,14 @@ dependencies = [
     "sqlalchemy>=2.0",
     "requests>=2.32",
     "pydantic>=2.7",
-    "docling"
+    "docling",
+    "chromadb>=1.5.9",
+    "sentence-transformers>=6.0.0",
+    "groq>=1.6.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.uv]
 environments = [

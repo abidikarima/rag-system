@@ -230,30 +230,3 @@ class DocumentParser:
                 )
 
         return results
-
-
-parser = DocumentParser(
-    enable_ocr=True,
-    enable_tables=True,
-    accurate_tables=False,
-)
-
-
-result = parser.parse("./data/3M_2023Q2_10Q.pdf")
-
-
-print(result.filename)
-print(result.extension)
-print(result.pages)
-
-
-# This is the actual DoclingDocument
-doc = result.document
-
-print(type(doc))
-
-
-# Export only when you need it
-markdown = result.to_markdown()
-
-print(markdown[:2000])
