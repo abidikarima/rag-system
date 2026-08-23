@@ -54,7 +54,14 @@ def main():
         path=CHROMA_DIR
     )
 
-    collection = chroma_client.get_or_create_collection(
+    try:
+        chroma_client.delete_collection(
+            name=COLLECTION_NAME
+        )
+    except Exception:
+        pass
+
+    collection = chroma_client.create_collection(
         name=COLLECTION_NAME,
         metadata={
             "hnsw:space": "cosine",

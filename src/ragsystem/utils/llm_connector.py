@@ -11,7 +11,7 @@ class GroqLLM:
     def __init__(
         self,
         config_path: str = "./secrets/config.yaml",
-        primary_model: str = "openai/gpt-oss-20b",
+        primary_model: str = "openai/gpt-oss-120b",
         fallback_models: Optional[List[str]] = None,
     ):
 
@@ -26,7 +26,7 @@ class GroqLLM:
 
         # fallback chain
         self.fallback_models = fallback_models or [
-            "openai/gpt-oss-20b",
+            "openai/gpt-oss-120b",
             "openai/gpt-oss-20b",
         ]
 

@@ -1,50 +1,39 @@
 EXTRACTOR_METADATA = """
-You are given a chunk of content extracted from a PDF document.
+You are a PDF document metadata extraction system.
 
-Your task is to analyze the chunk and return only a valid JSON object, with no explanation, comments, Markdown, or text outside the JSON.
+Analyze ONLY the content inside <chunk>...</chunk>.
 
-Determine the content type and summarize it according to these rules:
+IMPORTANT RULES:
+- The chunk contains real document content.
+- You MUST analyze the content.
+- NEVER return "No content provided."
+- NEVER return an empty summary when the chunk contains text.
+- Return ONLY valid JSON.
+- Do not return Markdown.
+- Do not add explanations.
+- Do not invent information.
 
-If the chunk contains normal text:
+For normal text:
+- Write a short summary of the main content.
+- Extract the 3 to 8 most important keywords.
 
-        - "type" must be "text".
-        - "summary" must briefly describe the main content.
-        - "keywords" must contain the most important keywords or concepts.
+For tables:
+- Give a short description of what the table contains.
+- Do not describe individual rows, cells, values, or numbers.
+- Return an empty keywords list.
 
-If the chunk contains a table:
+For images, figures, diagrams, or charts:
+- Give a short description of what the visual represents.
+- Return an empty keywords list.
 
-        - "type" must be "table".
-        - "summary" must briefly describe what the table contains and its purpose.
-        - Do not describe individual rows, values, numbers, or detailed table contents.
-        - "keywords" must be an empty list [].
-
-If the chunk appears to represent an image, figure, diagram, chart, or other visual content:
-
-        - "type" must be "image".
-        - "summary" must briefly describe what the image/visual represents.
-        - Do not provide detailed information about individual visual elements.
-        - "keywords" must be an empty list [].
-
-Important rules:
-
-        - Keep the summary short and focused on the main meaning/content.
-        - For text, extract only the most relevant keywords.
-        - Never invent information that is not present or reasonably inferable from the chunk.
-        - Always return valid JSON.
-        - Return only the JSON object.
-
-Return only json dict without additional characters or formatting. The JSON object should look like this:
+Return exactly and only the following JSON structure DO NOT add any extra fields or information or characters:
 
 {{
-"type": "text",
-"summary": "Short description of the main content.",
-"keywords": [
-"keyword1",
-"keyword2",
-"keyword3"
-]
+  "summary": "Short summary of the chunk.",
+  "keywords": ["keyword1", "keyword2"]
 }}
 
-Text chunk:
-{{TEXT_CHUNK}}
+<chunk>
+{TEXT_CHUNK}
+</chunk>
 """

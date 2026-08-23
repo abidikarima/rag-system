@@ -52,20 +52,13 @@ class ChunkingOptions:
     # Page filtering
     # ---------------------------------------------------------
 
-    # None = all pages
-    # [1, 2] = only pages 1 and 2
     pages: Optional[list[int]] = None
 
     # ---------------------------------------------------------
     # Document metadata
     # ---------------------------------------------------------
 
-    # Filename to store as source.
     source: Optional[str] = None
-
-    # Optional explicit title.
-    #
-    # If None, we try to get the title from Docling.
     title: Optional[str] = None
 
     # ---------------------------------------------------------
@@ -98,14 +91,8 @@ class ChunkingOptions:
     # Small chunk grouping
     # ---------------------------------------------------------
 
-    # Never create a grouped chunk larger than this.
-    max_words: int = 500
-
-    # A chunk below this number of words is considered small.
-    small_chunk_words: int = 150
-
-    # Do not merge chunks if the current group is already
-    # reasonably large, unless the next chunk is very small.
+    max_words: int = 250
+    small_chunk_words: int = 100
     min_group_words: int = 250
 
 
@@ -118,7 +105,6 @@ class DoclingChunker:
         self.options = options or ChunkingOptions()
 
         self._validate_options()
-
         self._chunker = self._build_chunker()
 
         self.llm = GroqLLM()
@@ -240,10 +226,6 @@ class DoclingChunker:
 
         selected_pages = self.options.pages
 
-        # -----------------------------------------------------
-        # All pages
-        # -----------------------------------------------------
-
         if selected_pages is None:
 
             yield from self._chunker.chunk(
@@ -251,10 +233,6 @@ class DoclingChunker:
             )
 
             return
-
-        # -----------------------------------------------------
-        # Selected pages
-        # -----------------------------------------------------
 
         selected_pages = set(
             selected_pages
@@ -288,12 +266,6 @@ class DoclingChunker:
                 document
             )
         )
-
-        # -----------------------------------------------------
-        # IMPORTANT:
-        #
-        # Group small chunks BEFORE LLM metadata extraction.
-        # -----------------------------------------------------
 
         grouped_chunks = (
             self._group_small_chunks(
@@ -346,10 +318,6 @@ class DoclingChunker:
         chunk,
     ) -> str:
 
-        # -----------------------------------------------------
-        # Grouped chunk
-        # -----------------------------------------------------
-
         grouped_text = getattr(
             chunk,
             "text",
@@ -360,10 +328,6 @@ class DoclingChunker:
             return str(
                 grouped_text
             ).strip()
-
-        # -----------------------------------------------------
-        # Normal Docling chunk
-        # -----------------------------------------------------
 
         text = self._chunker.contextualize(
             chunk
@@ -378,16 +342,15 @@ class DoclingChunker:
 
     # =========================================================
     # Chunk Type
+    #
+    # IMPORTANT:
+    # Type is determined by Docling, NOT by the LLM.
     # =========================================================
 
     @staticmethod
     def _chunk_kind(
         chunk,
     ) -> str:
-
-        # -----------------------------------------------------
-        # If already grouped, use its stored type.
-        # -----------------------------------------------------
 
         grouped_kind = getattr(
             chunk,
@@ -514,18 +477,11 @@ class DoclingChunker:
             )
         )
 
-        # -----------------------------------------------------
         # Different types cannot be merged.
-        # -----------------------------------------------------
-
         if current_kind != candidate_kind:
             return False
 
-        # -----------------------------------------------------
-        # Tables remain independent.
-        # Images remain independent.
-        # -----------------------------------------------------
-
+        # Tables and images remain independent.
         if current_kind != "text":
             return False
 
@@ -544,10 +500,6 @@ class DoclingChunker:
         if candidate_words == 0:
             return False
 
-        # -----------------------------------------------------
-        # Hard 500-word limit.
-        # -----------------------------------------------------
-
         if (
             current_words
             + candidate_words
@@ -565,16 +517,6 @@ class DoclingChunker:
         self,
         chunks: list,
     ):
-        """
-        Merge metadata from every original chunk.
-
-        Preserves:
-
-        - doc_items
-        - headings
-        - captions
-        - provenance
-        """
 
         if not chunks:
             return None
@@ -723,12 +665,7 @@ class DoclingChunker:
         texts: list,
     ):
 
-        # -----------------------------------------------------
-        # No need to wrap a single chunk.
-        # -----------------------------------------------------
-
         if len(chunks) == 1:
-
             return chunks[0]
 
         class GroupedChunk:
@@ -736,19 +673,9 @@ class DoclingChunker:
 
         grouped = GroupedChunk()
 
-        # -----------------------------------------------------
-        # Original chunks.
-        #
-        # Useful for traceability.
-        # -----------------------------------------------------
-
         grouped.chunks = list(
             chunks
         )
-
-        # -----------------------------------------------------
-        # Combined text.
-        # -----------------------------------------------------
 
         grouped.text = "\n\n".join(
             text.strip()
@@ -756,29 +683,17 @@ class DoclingChunker:
             if text.strip()
         )
 
-        # -----------------------------------------------------
-        # Determine semantic type.
-        # -----------------------------------------------------
-
         grouped._kind = (
             self._chunk_kind(
                 chunks[0]
             )
         )
 
-        # -----------------------------------------------------
-        # Merge metadata from ALL chunks.
-        # -----------------------------------------------------
-
         grouped.meta = (
             self._merge_chunk_metadata(
                 chunks
             )
         )
-
-        # -----------------------------------------------------
-        # Merge pages.
-        # -----------------------------------------------------
 
         pages = set()
 
@@ -794,19 +709,11 @@ class DoclingChunker:
             pages
         )
 
-        # -----------------------------------------------------
-        # Explicit merged headings.
-        # -----------------------------------------------------
-
         grouped._headings = getattr(
             grouped.meta,
             "headings",
             [],
         )
-
-        # -----------------------------------------------------
-        # Explicit merged captions.
-        # -----------------------------------------------------
 
         grouped._captions = getattr(
             grouped.meta,
@@ -847,10 +754,6 @@ class DoclingChunker:
             if words == 0:
                 continue
 
-            # -------------------------------------------------
-            # Start first group.
-            # -------------------------------------------------
-
             if not current_chunks:
 
                 current_chunks = [
@@ -869,10 +772,6 @@ class DoclingChunker:
                 current_chunks[-1]
             )
 
-            # -------------------------------------------------
-            # Merge if possible.
-            # -------------------------------------------------
-
             can_merge = (
                 self._can_merge(
                     previous,
@@ -881,11 +780,6 @@ class DoclingChunker:
                 )
             )
 
-            # -------------------------------------------------
-            # Only combine when at least one of the chunks is
-            # small.
-            # -------------------------------------------------
-
             is_small = (
                 current_words
                 < self.options.small_chunk_words
@@ -893,11 +787,6 @@ class DoclingChunker:
                 words
                 < self.options.small_chunk_words
             )
-
-            # -------------------------------------------------
-            # Also allow the group to grow until it reaches
-            # min_group_words.
-            # -------------------------------------------------
 
             group_is_small = (
                 current_words
@@ -924,20 +813,12 @@ class DoclingChunker:
 
                 continue
 
-            # -------------------------------------------------
-            # Finish current group.
-            # -------------------------------------------------
-
             result.append(
                 self._create_grouped_chunk(
                     current_chunks,
                     current_texts,
                 )
             )
-
-            # -------------------------------------------------
-            # Start a new group.
-            # -------------------------------------------------
 
             current_chunks = [
                 chunk
@@ -948,10 +829,6 @@ class DoclingChunker:
             ]
 
             current_words = words
-
-        # -----------------------------------------------------
-        # Flush final group.
-        # -----------------------------------------------------
 
         if current_chunks:
 
@@ -973,10 +850,6 @@ class DoclingChunker:
         chunk,
     ) -> list[int]:
 
-        # -----------------------------------------------------
-        # Grouped chunk.
-        # -----------------------------------------------------
-
         grouped_pages = getattr(
             chunk,
             "_pages",
@@ -988,10 +861,6 @@ class DoclingChunker:
             return list(
                 grouped_pages
             )
-
-        # -----------------------------------------------------
-        # Normal Docling chunk.
-        # -----------------------------------------------------
 
         pages = set()
 
@@ -1077,10 +946,6 @@ class DoclingChunker:
         chunk,
     ) -> str:
 
-        # -----------------------------------------------------
-        # Grouped chunk.
-        # -----------------------------------------------------
-
         grouped_text = getattr(
             chunk,
             "text",
@@ -1092,10 +957,6 @@ class DoclingChunker:
             return str(
                 grouped_text
             ).strip()
-
-        # -----------------------------------------------------
-        # Normal chunk.
-        # -----------------------------------------------------
 
         return self._chunk_text(
             chunk
@@ -1128,7 +989,7 @@ class DoclingChunker:
             return None
 
         # -----------------------------------------------------
-        # Remove ```json ... ```
+        # Remove Markdown code fences
         # -----------------------------------------------------
 
         text = re.sub(
@@ -1147,7 +1008,7 @@ class DoclingChunker:
         text = text.strip()
 
         # -----------------------------------------------------
-        # Try complete JSON.
+        # Direct JSON
         # -----------------------------------------------------
 
         try:
@@ -1168,11 +1029,10 @@ class DoclingChunker:
             TypeError,
             ValueError,
         ):
-
             pass
 
         # -----------------------------------------------------
-        # Find JSON object inside additional text.
+        # JSON embedded inside text
         # -----------------------------------------------------
 
         start = text.find(
@@ -1210,18 +1070,27 @@ class DoclingChunker:
                 TypeError,
                 ValueError,
             ):
-
                 pass
 
         return None
 
     # =========================================================
     # Validate LLM Metadata
+    #
+    # LLM only produces:
+    #
+    # {
+    #     "summary": "...",
+    #     "keywords": [...]
+    # }
+    #
+    # Type is determined by Docling.
     # =========================================================
 
     @staticmethod
     def _validate_llm_metadata(
         result,
+        chunk_kind: str,
     ) -> Optional[dict]:
 
         if not isinstance(
@@ -1229,31 +1098,21 @@ class DoclingChunker:
             dict,
         ):
 
-            return None
+            print(
+                "[DEBUG] Metadata is not a dict:",
+                repr(result),
+            )
 
-        content_type = result.get(
-            "type"
-        )
+            return None
 
         summary = result.get(
             "summary"
         )
 
         keywords = result.get(
-            "keywords"
+            "keywords",
+            [],
         )
-
-        # -----------------------------------------------------
-        # Type
-        # -----------------------------------------------------
-
-        if content_type not in (
-            "text",
-            "table",
-            "image",
-        ):
-
-            return None
 
         # -----------------------------------------------------
         # Summary
@@ -1264,11 +1123,59 @@ class DoclingChunker:
             str,
         ):
 
+            print(
+                "[DEBUG] Summary is not a string:",
+                repr(summary),
+            )
+
             return None
 
         summary = summary.strip()
 
         if not summary:
+
+            print(
+                "[DEBUG] Summary is empty"
+            )
+
+            return None
+
+        # -----------------------------------------------------
+        # Reject generic LLM responses
+        # -----------------------------------------------------
+
+        normalized_summary = (
+            re.sub(
+                r"\s+",
+                " ",
+                summary.lower(),
+            ).strip(
+                " .!?,;:"
+            )
+        )
+
+        invalid_summaries = {
+            "no content provided",
+            "no content",
+            "no information provided",
+            "no information",
+            "no text provided",
+            "no text",
+            "unable to summarize",
+            "cannot summarize",
+            "cannot provide a summary",
+            "not enough information",
+            "insufficient information",
+        }
+
+        if normalized_summary in (
+            invalid_summaries
+        ):
+
+            print(
+                "[DEBUG] LLM returned generic "
+                f"summary: {summary!r}"
+            )
 
             return None
 
@@ -1280,6 +1187,11 @@ class DoclingChunker:
             keywords,
             list,
         ):
+
+            print(
+                "[DEBUG] Keywords is not a list:",
+                repr(keywords),
+            )
 
             return None
 
@@ -1295,16 +1207,15 @@ class DoclingChunker:
             ).strip()
 
             if keyword:
-
                 clean_keywords.append(
                     keyword
                 )
 
         # -----------------------------------------------------
-        # Table and image chunks have no keywords.
+        # Table / image
         # -----------------------------------------------------
 
-        if content_type in (
+        if chunk_kind in (
             "table",
             "image",
         ):
@@ -1312,7 +1223,7 @@ class DoclingChunker:
             clean_keywords = []
 
         return {
-            "type": content_type,
+            "type": chunk_kind,
             "summary": summary,
             "keywords": clean_keywords,
         }
@@ -1330,12 +1241,8 @@ class DoclingChunker:
             chunk
         )
 
-        text = self._text_for_llm(
-            chunk
-        )
-
         # -----------------------------------------------------
-        # Table.
+        # Table
         # -----------------------------------------------------
 
         if kind == "table":
@@ -1350,7 +1257,7 @@ class DoclingChunker:
             }
 
         # -----------------------------------------------------
-        # Image.
+        # Image
         # -----------------------------------------------------
 
         if kind == "image":
@@ -1365,22 +1272,30 @@ class DoclingChunker:
             }
 
         # -----------------------------------------------------
-        # Text fallback.
+        # Text fallback
+        #
+        # IMPORTANT:
+        # Do not pretend that the first 40 words are a summary.
         # -----------------------------------------------------
+
+        text = self._text_for_llm(
+            chunk
+        )
 
         words = text.split()
 
-        summary_words = words[:40]
+        if words:
 
-        summary = " ".join(
-            summary_words
-        )
+            summary_words = words[:40]
 
-        if len(words) > 40:
+            summary = " ".join(
+                summary_words
+            )
 
-            summary += "..."
+            if len(words) > 40:
+                summary += "..."
 
-        if not summary:
+        else:
 
             summary = (
                 "Text content extracted "
@@ -1402,19 +1317,25 @@ class DoclingChunker:
         chunk,
     ) -> dict:
 
-        # -----------------------------------------------------
-        # IMPORTANT:
-        #
-        # At this point the chunk has already been grouped.
-        # -----------------------------------------------------
-
         chunk_text = (
             self._text_for_llm(
                 chunk
             )
         )
 
+        kind = self._chunk_kind(
+            chunk
+        )
+
+        # -----------------------------------------------------
+        # No text
+        # -----------------------------------------------------
+
         if not chunk_text:
+
+            print(
+                "[WARNING] Empty chunk text."
+            )
 
             return (
                 self._fallback_metadata(
@@ -1432,14 +1353,12 @@ class DoclingChunker:
             "[INFO] "
             f"Processing chunk: "
             f"{word_count} words | "
-            f"pages={self.pages(chunk)}"
+            f"pages={self.pages(chunk)} | "
+            f"type={kind}"
         )
 
         # -----------------------------------------------------
-        # Absolute safety limit.
-        #
-        # Grouping already enforces this, but we keep this
-        # protection in case a custom chunk enters this method.
+        # Safety limit
         # -----------------------------------------------------
 
         words = chunk_text.split()
@@ -1459,7 +1378,7 @@ class DoclingChunker:
             )
 
         # -----------------------------------------------------
-        # Build prompt.
+        # Build prompt
         # -----------------------------------------------------
 
         try:
@@ -1484,7 +1403,30 @@ class DoclingChunker:
             )
 
         # -----------------------------------------------------
-        # Call LLM.
+        # DEBUG:
+        #
+        # This is useful for finding cases where the Python
+        # chunk has text but the actual prompt does not.
+        # -----------------------------------------------------
+
+        print(
+            "[DEBUG] Prompt content length:",
+            len(prompt),
+        )
+
+        print(
+            "[DEBUG] Chunk text length:",
+            len(chunk_text),
+        )
+
+        # Uncomment if you need the complete prompt:
+        #
+        # print("========== PROMPT ==========")
+        # print(prompt)
+        # print("========== END PROMPT ======")
+
+        # -----------------------------------------------------
+        # Call LLM
         # -----------------------------------------------------
 
         try:
@@ -1509,7 +1451,7 @@ class DoclingChunker:
             )
 
         # -----------------------------------------------------
-        # Parse JSON.
+        # Parse JSON
         # -----------------------------------------------------
 
         result = (
@@ -1526,8 +1468,8 @@ class DoclingChunker:
             )
 
             print(
-                f"[DEBUG] Raw response: "
-                f"{response}"
+                "[DEBUG] Raw response:",
+                response,
             )
 
             return (
@@ -1537,12 +1479,13 @@ class DoclingChunker:
             )
 
         # -----------------------------------------------------
-        # Validate JSON structure.
+        # Validate
         # -----------------------------------------------------
 
         validated = (
             self._validate_llm_metadata(
-                result
+                result,
+                kind,
             )
         )
 
@@ -1584,7 +1527,7 @@ class DoclingChunker:
         )
 
         # -----------------------------------------------------
-        # Document title.
+        # Document title
         # -----------------------------------------------------
 
         title = None
@@ -1598,7 +1541,7 @@ class DoclingChunker:
             )
 
         # -----------------------------------------------------
-        # Headings.
+        # Headings
         # -----------------------------------------------------
 
         headings = getattr(
@@ -1608,7 +1551,7 @@ class DoclingChunker:
         )
 
         # -----------------------------------------------------
-        # Captions.
+        # Captions
         # -----------------------------------------------------
 
         captions = getattr(
@@ -1618,7 +1561,7 @@ class DoclingChunker:
         )
 
         # -----------------------------------------------------
-        # Doc items.
+        # Doc items
         # -----------------------------------------------------
 
         doc_items = []
@@ -1665,20 +1608,16 @@ class DoclingChunker:
                                 "",
                             )
                         ),
-                        "pages": (
-                            sorted(
-                                set(
-                                    item_pages
-                                )
+                        "pages": sorted(
+                            set(
+                                item_pages
                             )
                         ),
                     }
                 )
 
         # -----------------------------------------------------
-        # LLM metadata.
-        #
-        # This happens AFTER grouping.
+        # LLM metadata
         # -----------------------------------------------------
 
         llm_metadata = (
@@ -1688,7 +1627,7 @@ class DoclingChunker:
         )
 
         # -----------------------------------------------------
-        # Final metadata.
+        # Final metadata
         # -----------------------------------------------------
 
         return {
