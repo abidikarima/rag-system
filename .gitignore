@@ -140,3 +140,4 @@ cython_debug/
 OHR-Bench/
 open_ragbench/
 secrets/
+local_scripts/
