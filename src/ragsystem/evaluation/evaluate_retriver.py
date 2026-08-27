@@ -7,12 +7,12 @@ from typing import Any
 from ragsystem.core.retriever import ChromaRetriever
 
 
-TEST_DATA_DIR = Path("./test_data/test_data.jsonl")
+TEST_DATA_DIR = Path("./test_data/clean_test_data.jsonl")
 
 CHROMA_DIR = "./chroma_db"
 COLLECTION_NAME = "documents"
 
-TOP_K = 5
+TOP_K = 15
 
 
 def load_test_data(test_file: Path) -> list[dict[str, Any]]:
@@ -68,7 +68,7 @@ def evaluate(
     for index, example in enumerate(examples, start=1):
 
         question = example["question"]
-        expected_source = example["source"]
+        expected_source = example["metadata"]["source"]
 
         question_id = example.get(
             "question_id",

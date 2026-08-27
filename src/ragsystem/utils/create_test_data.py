@@ -505,5 +505,5 @@ if __name__ == "__main__":
     #    n_chunks=100,
     #   seed=42,
     # )
-    format_questions("test_data/llm_questions.json",
-                     "random_chunks.json", "clean_test_data.jsonl")
+    format_questions("test_data/llm2.json",
+                     "test_data/random_chunks.json", "clean_test_data.jsonl")
