@@ -9,7 +9,7 @@ def export_random_chunks_to_jsonl(
     chroma_dir: str,
     collection_name: str,
     output_file: str,
-    n_chunks: int = 20,
+    n_chunks: int = 100,
     seed: int | None = None,
 ) -> None:
 
@@ -26,29 +26,107 @@ def export_random_chunks_to_jsonl(
     if total == 0:
         raise ValueError("La collection est vide.")
 
-    n_chunks = min(n_chunks, total)
-
-    all_ids = collection.get(
-        include=[]
-    )["ids"]
-
     if seed is not None:
         random.seed(seed)
 
-    selected_ids = random.sample(
-        all_ids,
-        n_chunks,
-    )
-
-    selected = collection.get(
-        ids=selected_ids,
+    # Get ALL chunks with metadata
+    data = collection.get(
         include=[
             "documents",
             "metadatas",
-        ],
+        ]
+    )
+    print(f"Total chunks in collection: {len(data['ids'])}")
+    ids = data["ids"]
+    documents = data["documents"]
+    metadatas = data["metadatas"]
+
+    # ---------------------------------
+    # Group chunks by document
+    # ---------------------------------
+
+    chunks_by_document = {}
+
+    for chunk_id, text, metadata in zip(
+        ids,
+        documents,
+        metadatas,
+    ):
+
+        metadata = metadata or {}
+
+        # Change "source" to whatever field identifies
+        # the original document in your metadata.
+        document_id = metadata.get("source")
+
+        if not document_id:
+            continue
+
+        chunks_by_document.setdefault(
+            document_id,
+            []
+        ).append({
+            "id": chunk_id,
+            "text": text,
+            "metadata": metadata,
+        })
+
+    if not chunks_by_document:
+        raise ValueError(
+            "Aucun chunk ne possède de metadata 'source'."
+        )
+
+    # ---------------------------------
+    # Keep only documents having enough
+    # chunks to provide n_chunks
+    # ---------------------------------
+
+    eligible_documents = [
+        document_id
+        for document_id, chunks in chunks_by_document.items()
+        if len(chunks) >= n_chunks
+    ]
+
+    if not eligible_documents:
+        max_chunks = max(
+            len(chunks)
+            for chunks in chunks_by_document.values()
+        )
+
+        raise ValueError(
+            f"Aucun document ne contient {n_chunks} chunks. "
+            f"Le document ayant le plus de chunks en contient "
+            f"{max_chunks}."
+        )
+
+    # ---------------------------------
+    # Randomly choose ONE document
+    # ---------------------------------
+
+    selected_document = random.choice(
+        eligible_documents
     )
 
+    document_chunks = chunks_by_document[
+        selected_document
+    ]
+
+    # ---------------------------------
+    # Randomly choose 100 chunks
+    # from this ONE document
+    # ---------------------------------
+
+    selected_chunks = random.sample(
+        document_chunks,
+        n_chunks,
+    )
+
+    # ---------------------------------
+    # Save JSONL
+    # ---------------------------------
+
     output_path = Path(output_file)
+
     output_path.parent.mkdir(
         parents=True,
         exist_ok=True,
@@ -59,15 +137,12 @@ def export_random_chunks_to_jsonl(
         encoding="utf-8",
     ) as f:
 
-        for chunk_id, text, metadata in zip(
-            selected["ids"],
-            selected["documents"],
-            selected["metadatas"],
-        ):
+        for chunk in selected_chunks:
+
             item = {
-                "id": chunk_id,
-                "text": text,
-                "metadata": metadata,
+                "id": chunk["id"],
+                "text": chunk["text"],
+                "metadata": chunk["metadata"],
             }
 
             f.write(
@@ -79,8 +154,15 @@ def export_random_chunks_to_jsonl(
             )
 
     print(
-        f"{n_chunks} chunks exportés vers "
-        f"{output_path.resolve()}"
+        f"{len(selected_chunks)} chunks exportés."
+    )
+
+    print(
+        f"Document sélectionné : {selected_document}"
+    )
+
+    print(
+        f"Output : {output_path.resolve()}"
     )
 
 
@@ -181,18 +263,10 @@ def get_base_id(question_id):
     # =========================
 
 
-if __name__ == "__main__":
-    # Select some random chunks to ask gpt to generate question
-    DATA_DIR = "./data"
-    CHROMA_DIR = "./chroma_db"
-    COLLECTION_NAME = "documents"
-    # export_random_chunks_to_jsonl(
-    #   chroma_dir=CHROMA_DIR,
-    #   collection_name=COLLECTION_NAME,
-    #   output_file="random_chunks.json",
-    #   n_chunks=30,
-    #    seed=42,
-    # )
+def filter_questions(
+    questions_file: str,
+    answers_file: str,
+) -> list[dict]:
 
     FIRST_FILE = "random_chunks.json"
     SECOND_FILE = "testdata.json"
@@ -273,3 +347,163 @@ if __name__ == "__main__":
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
         print("Unmatched questions saved to: unmatched_questions.jsonl")
+
+
+def load_random_chunks(file_path):
+    """
+    Load random_chunks.json as JSONL.
+    Returns:
+        {
+            "id1": {"id": "id1", "source": "...", ...},
+            "id2": {"id": "id2", "source": "...", ...}
+        }
+    """
+    chunks_by_id = {}
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line_number, line in enumerate(f, 1):
+            line = line.strip()
+
+            if not line:
+                continue
+
+            try:
+                chunk = json.loads(line)
+
+                if "id" in chunk:
+                    chunks_by_id[chunk["id"]] = chunk
+
+            except json.JSONDecodeError as e:
+                print(
+                    f"Skipping invalid line {line_number}: {e}"
+                )
+
+    return chunks_by_id
+
+
+def load_jsonl(file_path):
+    """Load a JSONL file and index it by ID."""
+    data_by_id = {}
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line_number, line in enumerate(f, 1):
+            line = line.strip()
+
+            if not line:
+                continue
+
+            try:
+                item = json.loads(line)
+
+                if "id" in item:
+                    data_by_id[item["id"]] = item
+
+            except json.JSONDecodeError as e:
+                print(
+                    f"Skipping invalid line {line_number} "
+                    f"in {file_path}: {e}"
+                )
+
+    return data_by_id
+
+
+def format_questions(
+    questions_file,
+    random_chunks_file,
+    output_file
+):
+    # -----------------------------------------
+    # Load random_chunks.json
+    # -----------------------------------------
+    chunks = load_jsonl(random_chunks_file)
+
+    print(f"Loaded {len(chunks)} chunks")
+
+    # -----------------------------------------
+    # Load questions JSON
+    # -----------------------------------------
+    with open(questions_file, "r", encoding="utf-8") as f:
+        questions = json.load(f)
+
+    # If it's one object instead of a list
+    if isinstance(questions, dict):
+        questions = [questions]
+
+    created = 0
+    skipped = 0
+
+    # -----------------------------------------
+    # Create output JSONL
+    # -----------------------------------------
+    with open(output_file, "w", encoding="utf-8") as out:
+
+        for item in questions:
+
+            item_id = item.get("id")
+
+            # -------------------------------------
+            # Check if ID exists in random_chunks
+            # -------------------------------------
+            if item_id not in chunks:
+                print(f"ID not found: {item_id}")
+                skipped += 1
+                continue
+
+            # Get ALL data from random_chunks
+            chunk = chunks[item_id]
+
+            # -------------------------------------
+            # Add hard question
+            # -------------------------------------
+            if item.get("hard_question"):
+
+                result = chunk.copy()
+
+                result["question"] = item["hard_question"]
+
+                out.write(
+                    json.dumps(
+                        result,
+                        ensure_ascii=False
+                    ) + "\n"
+                )
+
+                created += 1
+
+            # -------------------------------------
+            # Add general question
+            # -------------------------------------
+            if item.get("general_question"):
+
+                result = chunk.copy()
+
+                result["question"] = item["general_question"]
+
+                out.write(
+                    json.dumps(
+                        result,
+                        ensure_ascii=False
+                    ) + "\n"
+                )
+
+                created += 1
+
+    print()
+    print(f"Created: {created}")
+    print(f"Skipped: {skipped}")
+
+
+if __name__ == "__main__":
+    # Select some random chunks to ask gpt to generate question
+    DATA_DIR = "./data"
+    CHROMA_DIR = "./chroma_db"
+    COLLECTION_NAME = "documents"
+    # export_random_chunks_to_jsonl(
+    #    chroma_dir=CHROMA_DIR,
+    #   collection_name=COLLECTION_NAME,
+    #    output_file="random_chunks.json",
+    #    n_chunks=100,
+    #   seed=42,
+    # )
+    format_questions("test_data/llm_questions.json",
+                     "random_chunks.json", "clean_test_data.jsonl")

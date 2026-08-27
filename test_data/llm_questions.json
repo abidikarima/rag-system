@@ -1,0 +1,502 @@
+[
+    {
+        "id": "3f4becfe-0dc9-5ecd-a6b7-3e046081ecc0",
+        "hard_question": "For which nine medical specialties does HNE apply a three-tier Copay structure?",
+        "general_question": "What are the basic conditions a service must meet to be covered under this Member Handbook?"
+    },
+    {
+        "id": "3c864caa-d8d7-5378-a9ef-e30fa33f8f9f",
+        "hard_question": "On what page does the section on Disclosures Required by Law begin?",
+        "general_question": "What major topics are covered in the later sections and appendices of the Member Handbook?"
+    },
+    {
+        "id": "2490ae1b-9e73-57c6-8e34-a06b1863bb77",
+        "hard_question": "Which residents are eligible for HNE's infertility services, and under what protocol are they defined?",
+        "general_question": "What types of infertility treatments does Health New England cover?"
+    },
+    {
+        "id": "19a77523-97b1-5850-af4a-f404c807f71c",
+        "hard_question": "What three examples of care are explicitly excluded from the emergency room care benefit?",
+        "general_question": "What options do members have for obtaining urgent, non-emergency care?"
+    },
+    {
+        "id": "168eaa0c-ca55-5794-bf78-a01d0ecd18a8",
+        "hard_question": "What is the maximum number of outpatient nutritional counseling visits covered per Policy Year, and what is the Copay for a Tier 3 specialist visit?",
+        "general_question": "How does HNE structure Copays for specialist office visits?"
+    },
+    {
+        "id": "9b25f518-2f10-5455-8ca7-f52e77d0d622",
+        "hard_question": "What is the Copay for Endocrinology specialist office visits under Tier 2 (good)?",
+        "general_question": "What general categories of services are listed in the Chart of Benefits?"
+    },
+    {
+        "id": "92715fee-b282-5d07-8a09-9a2e0111aa7a",
+        "hard_question": "Is Prior Approval or contact with HNE required before starting outpatient mental health or substance abuse treatment?",
+        "general_question": "What should a member do if they are involved in an auto accident?"
+    },
+    {
+        "id": "898cf406-fe08-5f4b-89c3-08238db36367",
+        "hard_question": "As of what effective date does the GIC's Notice of Privacy Practices apply, and how are revised notices communicated to members?",
+        "general_question": "What is the purpose of the GIC's Notice of Privacy Practices?"
+    },
+    {
+        "id": "eded559b-2ef6-53d9-aed2-adc0e92fe011",
+        "hard_question": "According to this section heading, what dual category of entitlements do HNE members possess?",
+        "general_question": "What general topic does this section of the handbook introduce?"
+    },
+    {
+        "id": "19c99fac-6563-5f2b-9872-c1c938482ee6",
+        "hard_question": "Within how many days from the date of service must a claim for reimbursement from an Out-of-Plan Provider be received by HNE?",
+        "general_question": "How does a member get reimbursed for services paid out-of-pocket to an Out-of-Plan Provider?"
+    },
+    {
+        "id": "60c99cc8-b322-54d7-abc8-3280d94aecc1",
+        "hard_question": "What events are listed as being beyond HNE's control that could excuse a failure to arrange services?",
+        "general_question": "How are official notices under the Member Handbook delivered?"
+    },
+    {
+        "id": "b094aaf8-b74a-5366-9d23-218ff940cd77",
+        "hard_question": "Within what timeframe must HNE notify a provider by phone of an Adverse Determination during concurrent review?",
+        "general_question": "What is 'concurrent review' and how does it affect ongoing treatment?"
+    },
+    {
+        "id": "01d5071f-5e75-5f9c-87e9-f2c56e08d170",
+        "hard_question": "Which five Massachusetts counties make up the HNE Service Area?",
+        "general_question": "What kind of health plan is Health New England and how does it operate?"
+    },
+    {
+        "id": "840100e8-0bca-5869-ba92-dd503cb8e263",
+        "hard_question": "What are the hours of availability for HNE's Member Services Representatives?",
+        "general_question": "How is the Member Handbook organized to help members find information?"
+    },
+    {
+        "id": "bd1237ac-3f1f-5864-8239-fb6a5708ce6e",
+        "hard_question": "According to Massachusetts law, how is a medical 'Emergency' legally defined?",
+        "general_question": "What should a member do if they believe they are experiencing an Emergency?"
+    },
+    {
+        "id": "da893109-6f57-560e-9dd2-f04f3f105a6e",
+        "hard_question": "What is the required age range for coverage of lung cancer screening with low-dose computed tomography?",
+        "general_question": "What preventive screenings does HNE cover for cancer and obstetric/gynecological conditions?"
+    },
+    {
+        "id": "7044511d-eb83-5114-9548-9df1a9f8e188",
+        "hard_question": "How many pairs of inserts are covered with one pair of custom-molded diabetic shoes per Policy Year?",
+        "general_question": "What kinds of durable medical equipment does HNE cover for diabetics?"
+    },
+    {
+        "id": "47ea84d3-84fe-58e0-878a-37fd838b6f78",
+        "hard_question": "By what age must a disabled child have become incapable of self-support to qualify for Handicapped Dependent Coverage?",
+        "general_question": "What happens to a subscriber's dependents' coverage if the subscriber dies?"
+    },
+    {
+        "id": "b794402c-d8c0-596c-a0e1-27161b9e77c1",
+        "hard_question": "Does HNE use genetic information contained in PHI for underwriting purposes?",
+        "general_question": "For what general purposes can HNE use and disclose a member's protected health information without authorization?"
+    },
+    {
+        "id": "8a3344d7-02ca-54ff-8359-9eedc94af12f",
+        "hard_question": "How many witnesses must sign a healthcare proxy document in Massachusetts for it to be legally valid?",
+        "general_question": "What is a healthcare proxy and what is it used for?"
+    },
+    {
+        "id": "4472e236-dc39-5dd2-abee-f539010042f3",
+        "hard_question": "What must a member do if they or a family member has coverage under another group health plan besides HNE?",
+        "general_question": "What is 'coordination of benefits' when a member has double coverage?"
+    },
+    {
+        "id": "0ba5dd16-2492-5834-be09-08746fe1d46a",
+        "hard_question": "Under what condition can an inpatient readmission Copay be waived within 30 days of a prior discharge?",
+        "general_question": "What does HNE cover under inpatient acute hospital and skilled nursing care?"
+    },
+    {
+        "id": "a8437907-6297-545d-946f-42c1cdd12e68",
+        "hard_question": "What must a disenrolled provider agree to regarding payment rates in order for a member to continue transitional coverage with them?",
+        "general_question": "Under what circumstances can a member continue seeing a provider after that provider leaves the HNE network?"
+    },
+    {
+        "id": "ec129c22-b2b3-5f67-bc3e-fc5b43dd90fa",
+        "hard_question": "During what dates each year can a member join a non-GIC Medicare drug plan under normal enrollment rules?",
+        "general_question": "Why is it beneficial that the GIC's prescription drug coverage is considered 'Creditable Coverage'?"
+    },
+    {
+        "id": "ec10c5a9-5aaa-5a6e-a1e9-489d4b064054",
+        "hard_question": "How many days before a procedure should a doctor call HNE to request Prior Approval, and how quickly must HNE decide once all information is received?",
+        "general_question": "What is the general process for obtaining Prior Approval from HNE?"
+    },
+    {
+        "id": "8cf3af62-38b0-590b-97d5-f3818f53f100",
+        "hard_question": "Is there a Copay, Coinsurance, or Deductible for women's preventive health services when received In-Plan?",
+        "general_question": "What kinds of women's preventive health services does HNE cover?"
+    },
+    {
+        "id": "3f096979-926b-52b2-9cbb-37c3a004990d",
+        "hard_question": "Within how many calendar days after a denial notice must a member submit a grievance to HNE?",
+        "general_question": "How can a member submit a grievance to HNE and what information should it include?"
+    },
+    {
+        "id": "540c7bc6-b7b1-5ef7-bfb7-151d2a8ad0b7",
+        "hard_question": "Under which state's laws will the Member Handbook Agreement be governed and construed?",
+        "general_question": "What general legal provisions govern the relationship between HNE, providers, and members?"
+    },
+    {
+        "id": "9df58e50-1355-5d5d-8f2f-def98d2f75bd",
+        "hard_question": "Under what circumstance is sperm or egg banking NOT covered by HNE?",
+        "general_question": "Who is responsible for arranging prenatal inpatient care under the plan?"
+    },
+    {
+        "id": "f875c6b0-fbdb-5b66-8726-0e383e83d04f",
+        "hard_question": "In which two languages can HNE Member Services directly answer questions, and are translation services free?",
+        "general_question": "What language assistance services does HNE offer to its members?"
+    },
+    {
+        "id": "bd1daea1-c10a-5bfe-9f2b-4e9b53ab7194",
+        "hard_question": "What is the Copay for a brand name Non-Formulary drug through the Access 90 Program at an In-Plan Pharmacy?",
+        "general_question": "How does HNE structure prescription drug Copays at an In-Plan Pharmacy?"
+    },
+    {
+        "id": "85b0e7e2-1c43-5bfb-9335-2d7923e9f89f",
+        "hard_question": "What percentage of household income threshold determines whether Commonwealth-offered coverage disqualifies someone from Health Connector subsidies?",
+        "general_question": "How might an offer of state employer health coverage affect eligibility for Health Connector subsidies?"
+    },
+    {
+        "id": "d53fc8ba-18e1-5646-a506-541ec53b124d",
+        "hard_question": "Does the Member Coinsurance for DME apply to Oxygen received from In-Plan Providers?",
+        "general_question": "What types of durable medical equipment and supplies does HNE cover?"
+    },
+    {
+        "id": "f0dcd5bd-17f0-5bf5-846b-eb712bc85f24",
+        "hard_question": "On what date did the current Notice of Privacy Practices take effect?",
+        "general_question": "How will members be informed if HNE changes its privacy practices notice?"
+    },
+    {
+        "id": "86549ea7-4926-57d2-a517-834ba8802b82",
+        "hard_question": "What are the two ways members can purchase prescribed drugs, and how does that affect cost?",
+        "general_question": "How does HNE categorize and price prescription drug coverage?"
+    },
+    {
+        "id": "5d17cdac-f602-5b70-aca9-a42eac992c99",
+        "hard_question": "Can a member revoke a written authorization for the GIC to disclose their PHI, and what limitation applies to a revocation?",
+        "general_question": "In what situations can the GIC use or share a member's PHI without their authorization?"
+    },
+    {
+        "id": "666fc585-c474-5516-8b28-f1eb2dc06e8c",
+        "hard_question": "What Coinsurance percentage applies to durable medical equipment, and what is one criterion DME must meet regarding sports use?",
+        "general_question": "What criteria must equipment meet to be considered covered DME?"
+    },
+    {
+        "id": "fec1e7ef-2e6f-5473-9f26-f0ecbd341f22",
+        "hard_question": "By approximately how much might a monthly Medicare Part D premium increase if someone goes 19 months without creditable coverage?",
+        "general_question": "What happens if a member loses creditable prescription drug coverage for an extended period?"
+    },
+    {
+        "id": "b9c9083e-662e-5367-96e0-d096671d7e59",
+        "hard_question": "What health information is excluded from the accounting-of-disclosures list the GIC must provide upon request?",
+        "general_question": "What rights do members have regarding their protected health information held by the GIC?"
+    },
+    {
+        "id": "b2071851-e6b4-5cd3-9f1d-cec9e0bbda8f",
+        "hard_question": "What is the maximum dollar amount HNE covers per hearing aid, and how often can it be replaced?",
+        "general_question": "How does hearing aid coverage differ for members under 21 versus those over 21?"
+    },
+    {
+        "id": "e1030cc9-f21f-5c8e-b682-109d7f2a8d60",
+        "hard_question": "Does a member need a PCP referral to receive care in an Emergency, and what should they do if there's time before going to the ER?",
+        "general_question": "What steps should a member follow when facing an Emergency?"
+    },
+    {
+        "id": "b131bb97-4cbb-5129-bf3d-cf3cb37e844b",
+        "hard_question": "What breast reconstruction services must HNE cover following a mastectomy under the Women's Health and Cancer Rights Act of 1998?",
+        "general_question": "What ambulance transportation costs does HNE decline to cover?"
+    },
+    {
+        "id": "faba77bf-fd5a-50b1-8752-137f96abc87f",
+        "hard_question": "Which specific high-cost equipment items require Prior Approval according to this list?",
+        "general_question": "What categories of DME require Prior Approval from HNE?"
+    },
+    {
+        "id": "318da37b-efd3-54f5-b132-fdee65ff5e1d",
+        "hard_question": "Are occupational and physical therapy services for children with developmental delays under MGL Chapter 766 covered by HNE?",
+        "general_question": "What kinds of rehabilitation-related services are excluded from the outpatient short-term rehabilitation benefit?"
+    },
+    {
+        "id": "c6934d84-0d93-531b-bd77-bbaa8f68fd88",
+        "hard_question": "What might happen if a member does not follow the rules described in the Member Handbook?",
+        "general_question": "What is the goal of HNE's 'Centered Care' program?"
+    },
+    {
+        "id": "3c36e593-20b7-530d-81bb-507848718002",
+        "hard_question": "What qualification must the practitioner reviewing a clinical appeal have regarding involvement in the initial decision?",
+        "general_question": "What happens to a previously approved ongoing treatment if a member files a grievance about its termination?"
+    },
+    {
+        "id": "8b951a2c-29a0-5c23-8f7a-fc62ca608191",
+        "hard_question": "Who is required to pay for GIC health coverage while continuing it during military service under USERRA?",
+        "general_question": "What protections does USERRA provide to GIC members who leave for military service?"
+    },
+    {
+        "id": "44897644-3632-50c6-89c1-3e7dcb55e1c9",
+        "hard_question": "What is the Copay amount for a Tier 2 (good) specialist visit under the Copay Tier system?",
+        "general_question": "How are Copay Tiers determined for certain medical specialists?"
+    },
+    {
+        "id": "9e7754fc-e50c-5b05-bf8e-262afc119fb0",
+        "hard_question": "How many scalp hair prostheses (wigs) per year does HNE cover, and what documentation is required for reimbursement?",
+        "general_question": "What lifestyle-related wellness programs does HNE offer coverage for?"
+    },
+    {
+        "id": "003acfc9-3737-55fb-8f03-6cbfbb25006e",
+        "hard_question": "Which vendor developed the physician efficiency scores used by HNE, and which three specialties are tiered based on cost-efficiency only?",
+        "general_question": "How does HNE determine which Copay Tier a specialist is assigned to?"
+    },
+    {
+        "id": "5cf2f87b-ccb3-55d6-87d6-f49207b564fc",
+        "hard_question": "Who is authorized to make medical necessity decisions about mental health services under this section?",
+        "general_question": "What levels of mental health care coverage does HNE provide?"
+    },
+    {
+        "id": "5978a018-8c79-53b2-b683-a9eeb88ce45d",
+        "hard_question": "After what time period does Medicare typically become the primary payer for a member's kidney dialysis?",
+        "general_question": "How does HNE cover kidney dialysis services?"
+    },
+    {
+        "id": "7891a721-c03d-5d96-a06a-efbf683b71ab",
+        "hard_question": "What is one example of how a pharmacist might consolidate a member's dosage to reduce pill count?",
+        "general_question": "What is the purpose of HNE's Quality through Quantity Management Program?"
+    },
+    {
+        "id": "0dad5264-69f4-545d-933c-f1579afed73b",
+        "hard_question": "Aside from Copays, Coinsurance, and the Deductible, can In-Plan Providers bill members for Covered Services?",
+        "general_question": "What are the different ways members share the cost of services with HNE?"
+    },
+    {
+        "id": "75805244-6f99-5464-8e49-b5942e6a3951",
+        "hard_question": "What right does HNE have if a member's services are covered under Workers' Compensation or a government program?",
+        "general_question": "How does HNE coordinate benefits when a member is covered by another medical payment policy?"
+    },
+    {
+        "id": "37d836ab-3c2c-5dc0-a611-8018d3ed936c",
+        "hard_question": "How often does HNE cover one routine eye examination, and what is the Copay?",
+        "general_question": "What telehealth and diagnostic services does HNE make available to members?"
+    },
+    {
+        "id": "71be9e2b-b41c-5eca-b528-0efbb1c078c3",
+        "hard_question": "Is there an annual limit on medication management visits with an In-Plan psychiatrist or clinical nurse specialist?",
+        "general_question": "How does a member access outpatient mental health or substance abuse treatment?"
+    },
+    {
+        "id": "48d4ad1d-c21b-53b3-a235-01c6875f95f6",
+        "hard_question": "Can a member refuse a treatment recommended by their doctor, and what must the provider tell them if they do?",
+        "general_question": "What rights do HNE members have regarding their care and provider relationship?"
+    },
+    {
+        "id": "ccba9227-0305-541d-b42a-78f33ee995fd",
+        "hard_question": "What coverage does a member and their dependents lose if the insured joins a non-GIC Medicare drug plan?",
+        "general_question": "What assistance is available for members with limited income who need help paying for Medicare drug coverage?"
+    },
+    {
+        "id": "432eb4fd-9f2e-5586-8acf-0f067d73c8b9",
+        "hard_question": "Until when will HNE cover care at an Out-of-Plan hospital following an emergency admission outside the Service Area?",
+        "general_question": "What are the rules for emergency care received while a member is outside the HNE Service Area?"
+    },
+    {
+        "id": "4d3714c3-de00-5476-a6ea-f0043eb7efcf",
+        "hard_question": "How often does the HNE Quality Management Committee meet to review the Work Plan's progress?",
+        "general_question": "What is the purpose of HNE's Quality Management Program?"
+    },
+    {
+        "id": "ed5805cc-0c39-550d-9ae6-9639775777ee",
+        "hard_question": "Under what circumstance might HNE disclose a deceased member's PHI to a family member or friend?",
+        "general_question": "Under what conditions will HNE share a member's PHI with family or friends?"
+    },
+    {
+        "id": "4cea862f-df81-54d3-949b-cbf6aafe3405",
+        "hard_question": "How many additional business days extension can HNE request if it needs a signed medical record release for a grievance review?",
+        "general_question": "How does HNE handle requests for medical records during the grievance process?"
+    },
+    {
+        "id": "90b2b3fe-212f-5205-a278-df565bd852f4",
+        "hard_question": "Where can a member file a complaint if they believe HNE isn't complying with mental health parity laws?",
+        "general_question": "What do mental health parity laws require of health plans like HNE?"
+    },
+    {
+        "id": "fb00ee58-33e2-5546-8f5d-8b19e8a801fc",
+        "hard_question": "Does genetic testing such as BRCA testing require Prior Approval from HNE?",
+        "general_question": "What kinds of procedures generally require Prior Approval before a member receives them?"
+    },
+    {
+        "id": "4b45d765-50a1-5428-8f91-8a5ee9948a47",
+        "hard_question": "Under what condition is Montelukast (generic Singulair) covered by HNE?",
+        "general_question": "What types of prescription drugs are generally excluded from HNE's coverage?"
+    },
+    {
+        "id": "427525a6-bd76-5360-a8d1-f4d2c9403f65",
+        "hard_question": "Within how many days of losing other coverage must a member apply to the GIC for special enrollment under HIPAA?",
+        "general_question": "When can a member enroll in the Plan outside the normal enrollment period?"
+    },
+    {
+        "id": "e083d0a3-e870-50c8-a323-900c33b9cd28",
+        "hard_question": "Who resolves questions of Medical Necessity when a drug request doesn't initially meet Prior Approval criteria?",
+        "general_question": "How does the drug Prior Approval process work at HNE?"
+    },
+    {
+        "id": "4f1fa60a-667d-58e8-819a-36bb1943b5ee",
+        "hard_question": "For which age ranges are generic aspirin products covered with no Cost Sharing for cardiovascular disease prevention?",
+        "general_question": "What prescription items are covered with no Copay or Deductible under the plan?"
+    },
+    {
+        "id": "272292d4-e2fa-5713-9d99-b5092d394457",
+        "hard_question": "How long must a person be deceased for their individually identifiable health information to be excluded from PHI protections?",
+        "general_question": "How does HNE define 'protected health information' (PHI)?"
+    },
+    {
+        "id": "f42c9960-6bf2-5b77-9cd5-ba5f2210c286",
+        "hard_question": "What is the maximum life expectancy criterion for a member to be considered terminally ill for hospice coverage?",
+        "general_question": "What services are covered and excluded under HNE's home health benefit?"
+    },
+    {
+        "id": "b5388e46-5444-5021-82a4-2c2ade90a1b7",
+        "hard_question": "What is the Out-of-Pocket Maximum for family coverage under this plan?",
+        "general_question": "What costs count toward the plan's Out-of-Pocket Maximum?"
+    },
+    {
+        "id": "1aa03060-dc79-518e-a468-a0a76e607d1e",
+        "hard_question": "Are home adaptations such as bathroom grab bars covered as DME under this plan?",
+        "general_question": "What types of items are generally excluded from durable medical equipment coverage?"
+    },
+    {
+        "id": "98484961-7b84-52f6-bbc5-8261d624ad63",
+        "hard_question": "What contractual protection does HNE require when sharing PHI with business associates?",
+        "general_question": "Does HNE share member health information with parties outside the organization?"
+    },
+    {
+        "id": "08c3dd5e-8b9f-5ec2-bd0e-747ddbe8a780",
+        "hard_question": "Within how many hours of a traumatic injury must a member receive emergency dental services (excluding suture removal)?",
+        "general_question": "What dental services does HNE cover?"
+    },
+    {
+        "id": "2f167004-8cc0-53b2-9b0e-bc328dc2321f",
+        "hard_question": "If the individual Deductible is met but the family Deductible is not, what is the member's payment responsibility?",
+        "general_question": "How do individual and family Deductibles interact under this plan?"
+    },
+    {
+        "id": "adcc23eb-aaaa-51d0-b5ed-a5703783188f",
+        "hard_question": "Under what conditions can HNE continue covering mental health treatment for a person past their 19th birthday?",
+        "general_question": "What mental health services does HNE cover for children and adolescents?"
+    },
+    {
+        "id": "0b99124a-f9c4-55b4-b067-fc0a04c61c40",
+        "hard_question": "Within how many days of an adopted child's placement in the home must they be enrolled for coverage?",
+        "general_question": "Who is eligible to enroll as a Dependent under the GIC's rules?"
+    },
+    {
+        "id": "aa6c49ef-b602-519c-a18e-b27643f744a7",
+        "hard_question": "What must happen before HNE will consider a request for a member to see an Out-of-Plan specialty Provider?",
+        "general_question": "How does a member obtain approval to see a specialist outside the HNE network?"
+    },
+    {
+        "id": "cfad4548-21b8-5dd1-af41-f34fc6297002",
+        "hard_question": "Up to what age are early intervention services covered, and what is the member's Copay for them?",
+        "general_question": "What outpatient surgical and early intervention services does HNE cover?"
+    },
+    {
+        "id": "8e5331af-90b1-513c-b039-8e91f781a410",
+        "hard_question": "How long is contact lens coverage provided following a cornea transplant, if Medically Necessary?",
+        "general_question": "What types of organ and bone marrow transplants does HNE cover?"
+    },
+    {
+        "id": "2405349f-1b34-5eb6-bdf3-39011299c191",
+        "hard_question": "What must a member do if HNE requests information to coordinate benefits or subrogate a claim?",
+        "general_question": "What are HNE's rights regarding coordination of benefits with other health plans?"
+    },
+    {
+        "id": "2c0f4120-8ce9-59de-a6aa-3e4d77126f54",
+        "hard_question": "What percentage-related data does the Office of Patient Protection publish about doctors leaving HNE's network?",
+        "general_question": "What role does the Massachusetts Office of Patient Protection play for HNE members?"
+    },
+    {
+        "id": "72a8908a-41a9-548d-b29b-d9f23e6cb470",
+        "hard_question": "Within how many days of a qualifying event may a subscriber enroll in the plan?",
+        "general_question": "Who is eligible to enroll in the plan and when can they do so?"
+    },
+    {
+        "id": "2a1e1950-b488-5c05-91e4-b92ea57daf8d",
+        "hard_question": "Within how many days must HNE have paid a claim for a First Line drug for a member to be eligible for the Step Therapy drug?",
+        "general_question": "How does HNE's Step Therapy Program work?"
+    },
+    {
+        "id": "71d8e591-6b44-5389-ae28-4827d0107499",
+        "hard_question": "What three certifications must a doctor provide for HNE to reverse a coverage denial within 48 hours?",
+        "general_question": "How does HNE expedite grievance reviews for urgent or immediately needed services?"
+    },
+    {
+        "id": "80238390-4e85-5d66-adc7-9bd103b4c5a4",
+        "hard_question": "What happens if HNE fails to act on a grievance within the specified time limits?",
+        "general_question": "What is a 'grievance' as defined in the internal grievance process section?"
+    },
+    {
+        "id": "1fdbfb80-f0d2-5700-9264-f608d0c40019",
+        "hard_question": "Can HNE seek reimbursement for more than the amount a member received from a third-party settlement?",
+        "general_question": "What are a member's responsibilities when HNE pursues subrogation?"
+    },
+    {
+        "id": "820b346f-ae06-5074-b15e-e38882edfce9",
+        "hard_question": "What services are covered for a full-time student Dependent attending school outside the HNE Service Area?",
+        "general_question": "What happens to a Dependent Child's coverage when they turn 26?"
+    },
+    {
+        "id": "b4ee8d53-fa24-5729-8deb-1796d332e29d",
+        "hard_question": "Is there a specific Massachusetts law requiring a particular living will form?",
+        "general_question": "What is a living will and how is it treated under Massachusetts law?"
+    },
+    {
+        "id": "86c5a7f2-c48e-5760-b44a-cdbd1a71bdab",
+        "hard_question": "What information must a medical child support order include to be considered 'qualified'?",
+        "general_question": "What is a Qualified Medical Child Support Order (QMCSO)?"
+    },
+    {
+        "id": "7fea18c5-36a3-54ae-8661-9910e8742108",
+        "hard_question": "What two criteria classify a medication as 'maintenance' for mail order purposes?",
+        "general_question": "What is HNE's mail order prescription program and what can't be ordered through it?"
+    },
+    {
+        "id": "5778b4c9-eca9-55f5-8eb7-7112c1d4bbb1",
+        "hard_question": "What is the name of the health insurance Marketplace established by the ACA in Massachusetts?",
+        "general_question": "What is the purpose of the Massachusetts Health Connector?"
+    },
+    {
+        "id": "4a97db40-8d5f-5041-8c4d-cc1f51f8b80a",
+        "hard_question": "Who is responsible for the Deductible and Copays listed on the Chart of Benefits?",
+        "general_question": "What is the purpose of the Chart of Benefits summary?"
+    },
+    {
+        "id": "b165c824-0177-58a2-b95a-675a99d494bc",
+        "hard_question": "On what page does the topic 'How to Obtain Care in an Emergency' appear according to the table of contents?",
+        "general_question": "What topics are covered in Sections 1 through 3 of the Member Handbook?"
+    },
+    {
+        "id": "8680d258-014b-5964-a11e-a29bd87689fa",
+        "hard_question": "For which four categories of use/disclosure is a member's prior written authorization always required?",
+        "general_question": "When does HNE need a member's written authorization to disclose their PHI?"
+    },
+    {
+        "id": "1b59a4f1-7a9b-5331-8d46-8d071680a849",
+        "hard_question": "What specific services are included in admission to any inpatient facility, according to this section?",
+        "general_question": "What does HNE cover under Rehabilitation Care Facility services?"
+    },
+    {
+        "id": "e77d67fc-5a79-555f-b669-741ee076c62b",
+        "hard_question": "Does HNE cover Medically Necessary treatment for complications resulting from non-covered cosmetic services?",
+        "general_question": "What kinds of procedures are considered cosmetic and excluded from coverage?"
+    },
+    {
+        "id": "9c32dc34-44b9-5f0d-a8f7-4514b1b264eb",
+        "hard_question": "Where can a member find information about income criteria for Health Connector subsidies?",
+        "general_question": "Can members qualify for financial assistance through the Health Connector?"
+    },
+    {
+        "id": "6e674189-7e74-5ca0-acb9-937ba3f643da",
+        "hard_question": "Within what timeframe must an admitting facility contact HNE's Health Services department to authorize a continued mental health inpatient stay?",
+        "general_question": "What should a member do for mental health or substance abuse emergency care?"
+    }
+]

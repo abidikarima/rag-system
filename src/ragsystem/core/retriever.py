@@ -5,7 +5,9 @@ from typing import Any
 
 import chromadb
 
-from ragsystem.core.vectorizer import DoclingChunkEmbedder
+from ragsystem.core.rag_pipeline.vectorizer import (
+    DoclingChunkEmbedder,
+)
 
 
 @dataclass
@@ -34,10 +36,6 @@ class ChromaRetriever:
     ):
         self.top_k = top_k
 
-        # ---------------------------------------------------------
-        # Chroma
-        # ---------------------------------------------------------
-
         self.client = chromadb.PersistentClient(
             path=chroma_dir
         )
@@ -45,10 +43,6 @@ class ChromaRetriever:
         self.collection = self.client.get_collection(
             name=collection_name
         )
-
-        # ---------------------------------------------------------
-        # Embedding model
-        # ---------------------------------------------------------
 
         self.embedder = DoclingChunkEmbedder(
             model_name=model_name,
@@ -62,40 +56,20 @@ class ChromaRetriever:
         top_k: int | None = None,
         where: dict[str, Any] | None = None,
     ) -> list[RetrievedChunk]:
-        """
-        Retrieve the most relevant chunks for a query.
-
-        Args:
-            query:
-                User's natural-language query.
-
-            top_k:
-                Number of chunks to retrieve.
-                Falls back to the value configured on the class.
-
-            where:
-                Optional Chroma metadata filter.
-
-        Returns:
-            List of RetrievedChunk objects ordered by similarity.
-        """
 
         if not query or not query.strip():
             return []
 
-        k = top_k or self.top_k
+        k = top_k if top_k is not None else self.top_k
 
         # ---------------------------------------------------------
         # Embed query
         # ---------------------------------------------------------
 
-        # DoclingChunkEmbedder.embed() expects chunks rather than
-        # plain strings, so use its underlying embedding interface
-        # if available.
         query_embedding = self._embed_query(query)
 
         # ---------------------------------------------------------
-        # Similarity search
+        # Search Chroma
         # ---------------------------------------------------------
 
         result = self.collection.query(
@@ -117,6 +91,7 @@ class ChromaRetriever:
         chunks: list[RetrievedChunk] = []
 
         for index, chunk_id in enumerate(ids):
+
             chunks.append(
                 RetrievedChunk(
                     id=chunk_id,
@@ -136,24 +111,18 @@ class ChromaRetriever:
 
         return chunks
 
-    def _embed_query(self, query: str) -> list[float]:
-        """
-        Convert a query into the same embedding space used during
-        document ingestion.
-        """
+    def _embed_query(
+        self,
+        query: str,
+    ) -> list[float]:
 
-        # Adapt this method to the public API exposed by your
-        # DoclingChunkEmbedder.
-        #
-        # The preferred implementation is for the embedder to expose
-        # something like:
-        #
-        #     embedder.embed_query(query)
-        #
-        if hasattr(self.embedder, "embed_query"):
-            return self.embedder.embed_query(query)
-
-        raise NotImplementedError(
-            "DoclingChunkEmbedder must expose an "
-            "`embed_query()` method for query retrieval."
+        # embed_vectors expects a sequence.
+        # Therefore pass [query], not query.
+        embedding = self.embedder.embed_vectors(
+            [query]
         )
+
+        # embedding shape is:
+        # (1, embedding_dimension)
+
+        return embedding[0].tolist()

@@ -5,9 +5,9 @@ import uuid
 from pathlib import Path
 
 import chromadb
-from ragsystem.core.vectorizer import DoclingChunkEmbedder
-from ragsystem.core.chunker import DoclingChunker, ChunkingOptions
-from ragsystem.core.injestor import RepositoryDocumentParser
+from ragsystem.core.rag_pipeline.vectorizer import DoclingChunkEmbedder
+from ragsystem.core.rag_pipeline.chunker import DoclingChunker, ChunkingOptions
+from ragsystem.core.rag_pipeline.injestor import RepositoryDocumentParser
 
 
 DATA_DIR = "./data"
@@ -74,7 +74,7 @@ def main():
 
     parser = RepositoryDocumentParser(
         data_dir=DATA_DIR,
-        enable_ocr=True,
+        enable_ocr=False,
         enable_tables=True,
         accurate_tables=False,
     )
