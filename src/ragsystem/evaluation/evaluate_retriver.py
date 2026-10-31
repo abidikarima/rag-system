@@ -7,7 +7,7 @@ from typing import Any
 from ragsystem.core.retriever import ChromaRetriever
 
 
-TEST_DATA_DIR = Path("./test_data/clean_test_data.jsonl")
+TEST_DATA_DIR = Path("./test_data/groq_test_questions.jsonl")
 
 CHROMA_DIR = "./chroma_db"
 COLLECTION_NAME = "documents"
@@ -388,7 +388,12 @@ def main():
     # =========================================================
 
     output_path = Path(
-        "hybrid_retrieval_evaluation.json"
+        "./results/hybrid_retrieval_evaluation_Groq_test_data.json"
+    )
+
+    output_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
     )
 
     with output_path.open(

@@ -1,7 +1,4 @@
-pipeline = RAGIngestionPipeline(
-    data_dir="./data",
-    qdrant_path="./qdrant_data",
-    collection_name="my_documents",
-)
+from update_rag_data import main
 
-pipeline.run()
+if __name__ == "__main__":
+    main()

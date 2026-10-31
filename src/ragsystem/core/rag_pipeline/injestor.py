@@ -23,11 +23,12 @@ class RepositoryDocumentParser:
         )
 
     def files(self) -> Iterator[Path]:
-        """Return all files in the repository data directory."""
-        yield from (
+        """Return all supported files in the repository data directory."""
+        yield from sorted(
             path
             for path in self.data_dir.rglob("*")
             if path.is_file()
+            and path.suffix.lower() in DocumentParser.SUPPORTED_EXTENSIONS
         )
 
     def parse_file(self, path: str | Path) -> DoclingDocument:

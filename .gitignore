@@ -142,3 +142,14 @@ open_ragbench/
 secrets/
 local_scripts/
 data/
+# macOS
+.DS_Store
+
+# Generated vector store (rebuild with `python update_rag_data.py`)
+chroma_db/
+
+# Partially extracted downloads
+*.part
+
+# All Chroma vector stores (generated, rebuild with update_rag_data.py)
+chroma_db*/

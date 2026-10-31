@@ -695,8 +695,11 @@ class ChromaRetriever:
         query: str,
     ) -> list[float]:
 
+        # Qwen3-Embedding expects queries to be encoded with its
+        # "query" instruction prompt (documents are encoded without).
         embedding = self.embedder.embed_vectors(
-            [query]
+            [query],
+            prompt_name="query",
         )
 
         return embedding[0].tolist()
