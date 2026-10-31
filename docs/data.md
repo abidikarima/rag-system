@@ -35,7 +35,7 @@ is therefore not kept in the file path or in the chunk metadata.
 
 ### How the data is downloaded
 
-Implemented in [`ragsystem/utils/data_downloader.py`](../utils/data_downloader.py)
+Implemented in [`ragsystem/utils/data_downloader.py`](../src/ragsystem/utils/data_downloader.py)
 and called automatically at the start of `update_rag_data.py`:
 
 1. If `data/` already contains at least one PDF, the download is skipped.
@@ -58,7 +58,7 @@ Download only: `uv run python -m ragsystem.utils.data_downloader`.
 
 ## 2. How the index is created
 
-Script: [`update_rag_data.py`](../../../update_rag_data.py).
+Script: [`update_rag_data.py`](../scripts/update_rag_data.py).
 
 ```
 data/*.pdf
@@ -72,8 +72,8 @@ chroma_db/
 
 ### 2.1 Parsing
 
-[`injestor.py`](../core/rag_pipeline/injestor.py) /
-[`parser.py`](../utils/parser.py), using **Docling**:
+[`injestor.py`](../src/ragsystem/core/rag_pipeline/injestor.py) /
+[`parser.py`](../src/ragsystem/utils/parser.py), using **Docling**:
 
 - Supported files: `.pdf`, `.docx`, `.html`, `.htm` (other files are ignored).
 - OCR **disabled** (`enable_ocr=False`): scanned pages without a text layer
@@ -82,7 +82,7 @@ chroma_db/
 
 ### 2.2 Chunking
 
-[`chunker.py`](../core/rag_pipeline/chunker.py):
+[`chunker.py`](../src/ragsystem/core/rag_pipeline/chunker.py):
 
 1. Docling **HybridChunker** with `max_tokens=2000`, `merge_peers=True` and
    `repeat_table_header=True` (a table split across chunks keeps its header).
@@ -101,7 +101,7 @@ For every chunk, `DoclingChunker.metadata()` produces:
   labels, not by the LLM.
 - **LLM summary and keywords**: one call per chunk to Groq (`openai/gpt-oss-120b`,
   falling back to `openai/gpt-oss-20b`), using the prompt in
-  [`prompts/metadata_extractor.py`](../prompts/metadata_extractor.py).
+  [`prompts/metadata_extractor.py`](../src/ragsystem/prompts/metadata_extractor.py).
   - Text longer than 250 words is truncated before being sent to the LLM.
   - Tables and images get a short description and an empty keyword list.
   - If the LLM fails or answers with something unusable, a fallback is stored:
@@ -113,7 +113,7 @@ For every chunk, `DoclingChunker.metadata()` produces:
 
 ### 2.4 Embeddings
 
-[`vectorizer.py`](../core/rag_pipeline/vectorizer.py):
+[`vectorizer.py`](../src/ragsystem/core/rag_pipeline/vectorizer.py):
 
 | Vector | Model | Input | Format |
 | --- | --- | --- | --- |
@@ -239,12 +239,12 @@ Evaluation outputs are written to `results/`, never to `test_data/`:
 
 | File | Written by |
 | --- | --- |
-| `combination_evaluation_<test file>.json` | [`evaluation/evaluate_combinations.py`](../evaluation/evaluate_combinations.py); the name follows the test set used (for example `combination_evaluation_groq_test_questions.json`) |
-| `hybrid_retrieval_evaluation_Groq_test_data.json` | [`evaluation/evaluate_retriver.py`](../evaluation/evaluate_retriver.py) (hybrid BM25 + vector) |
+| `combination_evaluation_<test file>.json` | [`evaluation/evaluate_combinations.py`](../src/ragsystem/evaluation/evaluate_combinations.py); the name follows the test set used (for example `combination_evaluation_groq_test_questions.json`) |
+| `hybrid_retrieval_evaluation_Groq_test_data.json` | [`evaluation/evaluate_retriver.py`](../src/ragsystem/evaluation/evaluate_retriver.py) (hybrid BM25 + vector) |
 | `combination_evaluation_claude_data.json`, `combination_evaluation_gro_data.json`, `combination_evaluation.json`, `hybrid_retrieval_evaluation.json` | Earlier runs, moved here from `test_data/` and the repository root |
 
 The first test set (200 questions from a single document, built by
-[`utils/create_test_data.py`](../utils/create_test_data.py)) was removed from
+[`utils/create_test_data.py`](../src/ragsystem/utils/create_test_data.py)) was removed from
 `test_data/`; it is still in the git history. Evaluation results for the
 current test sets are in [rag_evaluation.md](rag_evaluation.md).
 

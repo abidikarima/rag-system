@@ -489,7 +489,7 @@ def main() -> None:
         raise SystemExit(
             "No usable question: the expected chunks are not in this "
             "collection. Index their file(s) first, e.g.\n"
-            f"  uv run python update_rag_data.py --chroma-dir {args.chroma_dir} "
+            f"  uv run python scripts/update_rag_data.py --chroma-dir {args.chroma_dir} "
             f"--skip-download --files {' '.join(expected)}"
         )
 

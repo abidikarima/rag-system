@@ -1,38 +1,57 @@
 # RAG System
 
-Retrieval-Augmented Generation over a PDF corpus (OHR-Bench), with
-Docling parsing, hybrid BM25 + vector retrieval (Chroma, Qwen3-Embedding)
-and a Streamlit chat interface backed by Groq.
+Question answering over a collection of PDF documents (the OHR-Bench corpus:
+news, contracts, financial reports, manuals, scientific papers, administrative
+documents).
+
+- **Indexing:** PDFs are parsed with Docling, split into chunks, summarized by
+  an LLM (Groq) and stored in Chroma with three vectors per chunk: a dense
+  embedding (Qwen3-Embedding) and SPLADE sparse vectors of the text and of
+  the summary.
+- **Retrieval:** dense embedding + SPLADE sparse vector on the chunk text, the
+  best method in the [evaluation](docs/rag_evaluation.md).
+- **Answering:** a FastAPI service with a web chat interface. The LLM answers
+  from the retrieved chunks and cites them; the references are returned with
+  the answer.
 
 ## Project structure
 
 ```
 ragsystem
-├── update_rag_data.py            # Pipeline: download data -> parse -> chunk -> embed -> Chroma
-├── run.py                        # Shortcut for update_rag_data.py
-├── data/                         # PDF corpus (downloaded automatically, not in git)
-├── chroma_db/                    # Vector store (generated, not in git)
-├── test_data/                    # Retrieval evaluation questions and results
-├── secrets/config.yaml           # GROQ_API_KEY (not in git)
-└── src
-    ├── app/app.py                # Streamlit chatbot
-    └── ragsystem
-        ├── core
-        │   ├── rag_pipeline      # injestor (Docling), chunker, vectorizer
-        │   └── retriever.py      # Hybrid BM25 + vector retriever
-        ├── evaluation            # Retrieval evaluation
-        ├── prompts               # LLM prompts
-        └── utils                 # parser, Groq connector, data downloader, test data
+├── README.md
+├── pyproject.toml / uv.lock      # Dependencies (uv)
+├── docs/                         # Documentation (data, test data, evaluation)
+├── scripts/
+│   ├── update_rag_data.py        # Pipeline: download -> parse -> chunk -> embed -> Chroma
+│   └── run.py                    # Shortcut for update_rag_data.py
+├── src/
+│   ├── ragsystem/
+│   │   ├── api/                  # FastAPI service + web chat interface (static/index.html)
+│   │   ├── core/
+│   │   │   ├── rag_pipeline/     # Docling ingestion, chunker, vectorizer (dense + SPLADE)
+│   │   │   ├── dense_sparse_retriever.py  # Retriever used by the API
+│   │   │   └── retriever.py      # Older BM25 + vector retriever
+│   │   ├── evaluation/           # Retrieval evaluation scripts
+│   │   ├── prompts/              # LLM prompts (metadata, questions, chatbot)
+│   │   └── utils/                # Parser, Groq connector, data downloader, test question generator
+│   └── app/app.py                # Legacy Streamlit app (old retriever, see below)
+├── test_data/                    # Evaluation questions (Groq and Claude sets)
+├── results/                      # Evaluation results (JSON)
+│
+│   Not in git (generated or private):
+├── data/                         # PDF corpus, downloaded automatically
+├── chroma_db_v1/                 # Current Chroma index
+└── secrets/config.yaml           # GROQ_API_KEY
 ```
 
 ## Documentation
 
-- [Data: corpus, index and test data](src/ragsystem/docs/data.md): what the
-  data contains, how it is downloaded, chunked, embedded and stored.
-- [Test data](src/ragsystem/docs/test_data.md): how the 300 retrieval test
-  questions are generated (random documents, 3 difficulty levels).
-- [RAG evaluation](src/ragsystem/docs/rag_evaluation.md): evaluation method
-  and results.
+- [Data](docs/data.md): what the corpus contains, and how it is downloaded,
+  chunked, embedded and stored.
+- [Test data](docs/test_data.md): how the 300 retrieval test questions are
+  generated (random documents, 3 difficulty levels).
+- [Evaluation](docs/rag_evaluation.md): comparison of 7 retrieval methods on
+  the Claude and Groq test sets.
 
 ## Setup
 
@@ -48,9 +67,14 @@ GROQ_API_KEY: "your-key"
 
 ## Build the index
 
+Run the scripts from the repository root:
+
 ```bash
-uv run python update_rag_data.py
+uv run python scripts/update_rag_data.py --chroma-dir ./chroma_db_v1
 ```
+
+Without `--chroma-dir`, the index is written to `./chroma_db`. The API reads
+`./chroma_db_v1` by default (see `RAG_CHROMA_DIR` below).
 
 On first run the corpus is downloaded from the Hugging Face dataset
 [`opendatalab/OHR-Bench`](https://huggingface.co/datasets/opendatalab/OHR-Bench)
@@ -64,20 +88,13 @@ Useful options:
 
 | Option | Effect |
 | --- | --- |
+| `--limit N` | Process at most N new documents per run (default `MAX_DOCUMENTS` in the script, `0` = all) |
 | `--categories academic law ...` | OHR-Bench categories to download (default: all except `textbook`) |
-| `--limit N` | Process at most N new documents per run (default `MAX_DOCUMENTS = 50`, `0` = all) |
 | `--skip-download` | Only index what is already in `data/` |
 | `--force-download` | Download even if `data/` is not empty (adds missing files) |
-| `--backfill-sparse` | Add the SPLADE sparse vector to chunks indexed before it existed |
 | `--rebuild` | Drop the collection and re-index everything |
 
 To only download the data: `uv run python -m ragsystem.utils.data_downloader`.
-
-## Chat interface
-
-```bash
-uv run streamlit run src/app/app.py
-```
 
 ## Chatbot API
 
@@ -148,4 +165,19 @@ commands, and it changes every time the tunnel restarts.
 
 ## Evaluation
 
-See [src/ragsystem/docs/rag_evaluation.md](src/ragsystem/docs/rag_evaluation.md).
+```bash
+# Generate a test set (Groq LLM, 300 questions)
+uv run python -m ragsystem.utils.generate_test_questions
+
+# Compare the 7 retrieval methods on a test set
+uv run python -m ragsystem.evaluation.evaluate_combinations --test-file test_data/groq_test_questions.jsonl
+```
+
+Results are written to `results/`. Method and conclusions:
+[docs/rag_evaluation.md](docs/rag_evaluation.md).
+
+## Legacy Streamlit app
+
+`src/app/app.py` is the first chat interface. It uses the older BM25 + vector
+retriever and reads `./chroma_db`, so it does not work with the current index.
+Use the chat interface of the API instead.

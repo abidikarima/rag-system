@@ -5,7 +5,7 @@ This document explains how the retrieval test set
 
 The test set is used to measure whether the search finds the right chunk
 for a question (see
-[`evaluation/evaluate_combinations.py`](../evaluation/evaluate_combinations.py)).
+[`evaluation/evaluate_combinations.py`](../src/ragsystem/evaluation/evaluate_combinations.py)).
 
 ---
 
@@ -19,8 +19,8 @@ for a question (see
 | Difficulty | balanced: 100 `easy`, 100 `medium`, 100 `hard` |
 | Generator | Groq LLM (`openai/gpt-oss-120b`, falling back to `openai/gpt-oss-20b`) |
 | Source index | Chroma `./chroma_db_v1`, collection `documents` |
-| Script | [`utils/generate_test_questions.py`](../utils/generate_test_questions.py) |
-| Prompt | [`prompts/question_generator.py`](../prompts/question_generator.py) |
+| Script | [`utils/generate_test_questions.py`](../src/ragsystem/utils/generate_test_questions.py) |
+| Prompt | [`prompts/question_generator.py`](../src/ragsystem/prompts/question_generator.py) |
 
 ```bash
 uv run python -m ragsystem.utils.generate_test_questions

@@ -12,7 +12,7 @@ Run from the repository root:
 
     uv run python -m ragsystem.utils.generate_test_questions
 
-See src/ragsystem/docs/test_data.md for the full description.
+See docs/test_data.md for the full description.
 """
 
 from __future__ import annotations
