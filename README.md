@@ -112,8 +112,9 @@ Startup takes about a minute (models and index are loaded once). Then open
 
 | Endpoint | Description |
 | --- | --- |
-| `GET /` | Chat interface: answers with clickable citations and a sources panel. `/?q=your+question` asks a question directly |
+| `GET /` | Chat interface: conversation history (left), answers with clickable citations, document groups and main topics (right). `/?q=your+question` asks a question directly |
 | `POST /chat` | `{"question": "...", "top_k": 5}` → answer with citations `[1]`, `[2]`… and the matching references |
+| `GET /documents` | Overview of the indexed documents: groups (news, contracts…) and main topics |
 | `GET /health` | Status and number of indexed chunks |
 | `GET /docs` | Interactive documentation |
 
@@ -125,7 +126,33 @@ curl -X POST http://localhost:8000/chat \
 ```
 
 Each reference contains the number used in the answer, the chunk id, the
-source PDF, title, pages, headings, retrieval score and an excerpt.
+source PDF, title, pages, headings, retrieval score and an excerpt. Only the
+sources cited in the answer are returned (none when the answer is not in the
+documents).
+
+**Conversation and off-topic messages.** Send the previous messages in
+`history` so follow-ups work:
+
+```json
+{
+  "question": "And how did it compare to the previous year?",
+  "history": [
+    {"role": "user", "content": "What were AMD's marketing expenses in 2022?"},
+    {"role": "assistant", "content": "About $683 million in 2022 [1]."}
+  ]
+}
+```
+
+Before searching, one LLM call classifies the message (`intent` in the
+response):
+
+| `intent` | Example | Behaviour |
+| --- | --- | --- |
+| `documents` | "And how did it compare to the previous year?" | Rewritten as a standalone question (`search_query`), then searched and answered with citations |
+| `chitchat` | "Hello", "What can you do?" | Short reply, no search |
+| `off_topic` | "Write a poem", "What is the capital of Australia?" | Polite refusal with example topics, no search |
+
+The web interface sends the last 8 messages of the open conversation.
 
 Configuration (environment variables):
 

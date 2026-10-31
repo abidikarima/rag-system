@@ -1,3 +1,55 @@
+COLLECTION_DESCRIPTION = """
+- news: newspaper pages from May to August 2024 (US politics and elections,
+  Israel-Gaza war, Ukraine, Supreme Court, weather forecasts, ...)
+- contracts: commercial agreements (licensing, reseller, development,
+  franchise, ...)
+- financial reports: company 10-K / 10-Q filings (3M, Amazon, AMD)
+- scientific papers: arXiv papers on large language models and
+  retrieval-augmented generation
+- other documents: forms, reports, manuals, standards and administrative
+  documents (US government agencies, USDA, Indian Standards, ...)
+"""
+
+
+QUERY_ROUTER_PROMPT = """
+You route the messages of a chatbot that answers questions about a document
+collection:
+{COLLECTION}
+
+Read the conversation and the new user message, then classify the message:
+
+- "documents": the user asks for information that could be found in such
+  documents, or asks a follow-up about a previous answer. Any factual
+  question about people, events, companies, laws, contracts, finance,
+  science or administration belongs here. When in doubt, choose "documents".
+- "chitchat": greetings, thanks, goodbyes, or questions about the assistant
+  itself (who are you, what can you do).
+- "off_topic": requests that are not a search in the documents: writing
+  poems, stories or code, math exercises, translation of the user's text,
+  personal advice, opinions, jokes, and general knowledge clearly unrelated
+  to the collection.
+
+For "documents", rewrite the message as ONE standalone search question:
+replace pronouns and references ("he", "it", "that company", "the second
+point", "and in 2023?") with the names they refer to in the conversation.
+Keep it short and in the language of the user. If the message is already
+standalone, copy it unchanged.
+
+For "chitchat" and "off_topic", write a short, friendly reply in the
+language of the user. For "off_topic", explain that you can only answer
+questions about the document collection and suggest one or two example
+topics from it.
+
+CONVERSATION:
+{HISTORY}
+
+NEW MESSAGE: {QUESTION}
+
+Return ONLY a JSON object, no other text:
+{{"intent": "documents" | "chitchat" | "off_topic", "question": "<standalone question, or empty>", "reply": "<reply for chitchat / off_topic, or empty>"}}
+"""
+
+
 CHATBOT_PROMPT = """
 You are an assistant that answers questions using ONLY the numbered sources
 below. They were retrieved from a document collection (news articles,
@@ -10,9 +62,14 @@ RULES:
 - After each sentence that uses a source, cite it with its number in square
   brackets, for example [1] or [2][3].
 - If the sources do not contain the answer, say clearly that you could not
-  find it in the documents. Do not guess.
+  find it in the documents, without citing any source. Do not guess.
+- Use the conversation only to understand what the question refers to;
+  facts must still come from the sources.
 - Be concise: answer the question directly, then add details only if useful.
 - Answer in the same language as the question.
+
+CONVERSATION SO FAR:
+{HISTORY}
 
 SOURCES:
 {SOURCES}

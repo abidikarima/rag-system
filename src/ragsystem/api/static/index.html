@@ -8,6 +8,7 @@
   :root {
     --bg: #f4f6fa;
     --panel: #ffffff;
+    --side: #eef1f6;
     --ink: #0f1b2d;
     --muted: #5b6b80;
     --line: #dfe5ee;
@@ -16,6 +17,7 @@
     --accent-soft: #e6edfd;
     --user: #2457d6;
     --ref-bg: #f7f9fc;
+    --ok: #12805c;
     --error: #b42318;
     --error-soft: #fef3f2;
     --error-line: #fecdca;
@@ -26,6 +28,7 @@
     :root {
       --bg: #0f141c;
       --panel: #171e29;
+      --side: #121821;
       --ink: #e8edf5;
       --muted: #9aa8bb;
       --line: #2a3443;
@@ -34,6 +37,7 @@
       --accent-soft: #1f2d47;
       --user: #3a6ff0;
       --ref-bg: #1c2431;
+      --ok: #4cc79a;
       --error: #ffb4a8;
       --error-soft: #3a1f1d;
       --error-line: #5c2c27;
@@ -50,15 +54,114 @@
     line-height: 1.65;
     color: var(--ink);
     background: var(--bg);
-    display: flex;
-    flex-direction: column;
     height: 100vh;
     height: 100dvh;
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr) 340px;
+    overflow: hidden;
+  }
+  button { font: inherit; color: inherit; }
+
+  /* ---------- Side panels ---------- */
+  aside {
+    background: var(--side);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  #history { border-right: 1px solid var(--line); }
+  #info { border-left: 1px solid var(--line); }
+  .side-head {
+    padding: 16px 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .side-head h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0; flex: 1; }
+  .side-body { flex: 1; overflow-y: auto; padding: 0 12px 20px; }
+  .close-panel {
+    display: none;
+    border: 0; background: none; cursor: pointer;
+    font-size: 1.4rem; line-height: 1; color: var(--muted); padding: 4px 8px;
   }
 
-  /* ---------- Header ---------- */
+  /* History */
+  #new-chat {
+    margin: 0 12px 14px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  #new-chat:hover { border-color: var(--accent); color: var(--accent); }
+  .day { font-size: 0.75rem; font-weight: 700; color: var(--muted); margin: 16px 6px 6px; }
+  .chat-item {
+    display: flex; align-items: center;
+    border-radius: 10px;
+  }
+  .chat-item:hover, .chat-item.active { background: var(--panel); }
+  .chat-item.active { box-shadow: inset 3px 0 0 var(--accent); }
+  .chat-item .open {
+    flex: 1; min-width: 0;
+    border: 0; background: none; cursor: pointer;
+    text-align: left;
+    padding: 9px 10px;
+    font-size: 0.9rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .chat-item .delete {
+    border: 0; background: none; cursor: pointer;
+    color: var(--muted); padding: 4px 10px; font-size: 1.05rem;
+    visibility: hidden;
+  }
+  .chat-item:hover .delete, .chat-item.active .delete { visibility: visible; }
+  .chat-item .delete:hover { color: var(--error); }
+  .no-history { color: var(--muted); font-size: 0.88rem; padding: 6px; }
+
+  /* Document information */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .stat b { display: block; font-size: 1.35rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 0.78rem; color: var(--muted); }
+  .group {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px 14px;
+    margin-bottom: 10px;
+  }
+  .group-head { display: flex; align-items: baseline; gap: 8px; }
+  .group-head strong { flex: 1; font-size: 0.95rem; }
+  .group-head span { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .bar { height: 5px; border-radius: 3px; background: var(--line); margin: 6px 0 6px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+  .group p { margin: 0 0 8px; font-size: 0.8rem; color: var(--muted); line-height: 1.45; }
+  .topics { display: flex; flex-wrap: wrap; gap: 6px; }
+  .topic {
+    border: 1px solid var(--line);
+    background: var(--ref-bg);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 0.76rem;
+    cursor: pointer;
+  }
+  .topic:hover { border-color: var(--accent); color: var(--accent); }
+  .info-note { font-size: 0.78rem; color: var(--muted); margin: 6px 4px 0; line-height: 1.5; }
+
+  /* ---------- Chat column ---------- */
+  .chat { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
   header {
-    padding: 14px 24px;
+    padding: 12px 24px;
     background: var(--panel);
     border-bottom: 1px solid var(--line);
     display: flex;
@@ -75,21 +178,21 @@
     display: grid; place-items: center;
     font-weight: 800; font-size: 1.1rem;
   }
-  header h1 { font-size: 1.3rem; margin: 0; line-height: 1.2; }
-  #status { font-size: 0.85rem; color: var(--muted); }
-  #key-box {
-    margin-left: auto;
+  header h1 { font-size: 1.25rem; margin: 0; line-height: 1.2; }
+  #status { font-size: 0.82rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  #status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  #status.ok::before { background: var(--ok); }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .toggle {
     display: none;
-    gap: 8px;
-    align-items: center;
-    font-size: 0.9rem;
-    color: var(--muted);
+    border: 1px solid var(--line); background: var(--panel);
+    border-radius: 10px; padding: 6px 12px; font-size: 0.85rem; cursor: pointer;
   }
-  #key-box input { width: 200px; font-size: 0.9rem; padding: 8px 12px; }
+  #key-box { display: none; gap: 8px; align-items: center; font-size: 0.85rem; color: var(--muted); }
+  #key-box input { width: 180px; font-size: 0.85rem; padding: 7px 12px; }
 
-  /* ---------- Conversation ---------- */
-  main { flex: 1; overflow-y: auto; padding: 28px 16px 36px; }
-  .thread { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+  main { flex: 1; overflow-y: auto; padding: 28px 20px 36px; }
+  .thread { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
   .msg { white-space: pre-wrap; overflow-wrap: anywhere; }
   .msg.user {
     align-self: flex-end;
@@ -110,8 +213,10 @@
     font-size: 1.05rem;
     line-height: 1.75;
   }
+  .msg.pending { color: var(--muted); }
   .msg.error { background: var(--error-soft); border-color: var(--error-line); color: var(--error); }
   .msg .meta { margin-top: 14px; font-size: 0.8rem; color: var(--muted); white-space: normal; }
+  .msg .searched { margin-bottom: 10px; font-size: 0.82rem; color: var(--muted); white-space: normal; }
 
   .cite {
     display: inline-block;
@@ -131,15 +236,8 @@
   }
   .cite:hover { background: var(--accent); color: var(--accent-ink); }
 
-  /* ---------- Sources ---------- */
   details.refs { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); white-space: normal; }
-  details.refs summary {
-    cursor: pointer;
-    color: var(--accent);
-    font-weight: 700;
-    font-size: 0.95rem;
-    list-style-position: inside;
-  }
+  details.refs summary { cursor: pointer; color: var(--accent); font-weight: 700; font-size: 0.95rem; }
   .ref {
     margin-top: 12px;
     padding: 14px 16px;
@@ -152,36 +250,32 @@
   }
   .ref.flash { outline: 3px solid var(--accent); outline-offset: 2px; }
   .ref .title { font-weight: 700; font-size: 0.98rem; overflow-wrap: anywhere; }
-  .ref .info { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+  .ref .ref-info { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
   .ref .excerpt { margin-top: 8px; }
 
-  /* ---------- Empty state ---------- */
-  .empty { text-align: center; color: var(--muted); margin: 9vh auto 0; max-width: 640px; }
+  .empty { text-align: center; color: var(--muted); margin: 8vh auto 0; max-width: 620px; }
   .empty h2 { color: var(--ink); font-size: 1.8rem; margin: 0 0 10px; line-height: 1.25; }
   .empty p { margin: 0 0 26px; font-size: 1.05rem; }
   .suggestions { display: flex; flex-direction: column; gap: 10px; }
   .example {
-    font: inherit;
     font-size: 1rem;
     text-align: left;
     padding: 14px 18px;
     border-radius: 14px;
     border: 1px solid var(--line);
     background: var(--panel);
-    color: var(--ink);
     cursor: pointer;
     box-shadow: var(--shadow);
   }
   .example:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* ---------- Composer ---------- */
   form {
-    padding: 16px 16px 20px;
+    padding: 16px 20px 20px;
     background: var(--panel);
     border-top: 1px solid var(--line);
   }
-  .composer { max-width: 860px; margin: 0 auto; display: flex; gap: 10px; align-items: stretch; }
-  textarea, input, select {
+  .composer { max-width: 820px; margin: 0 auto; display: flex; gap: 10px; }
+  textarea, input {
     font: inherit;
     color: var(--ink);
     background: var(--panel);
@@ -196,10 +290,8 @@
     font-size: 1.05rem;
     line-height: 1.5;
   }
-  textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
-  select { padding: 0 12px; font-size: 0.9rem; }
+  textarea:focus, input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
   button#send {
-    font: inherit;
     font-size: 1.05rem;
     font-weight: 700;
     border: 0;
@@ -210,117 +302,251 @@
     cursor: pointer;
   }
   button#send:disabled { opacity: 0.5; cursor: default; }
-  .hint { max-width: 860px; margin: 8px auto 0; font-size: 0.8rem; color: var(--muted); }
+  .hint { max-width: 820px; margin: 8px auto 0; font-size: 0.8rem; color: var(--muted); }
 
-  @media (max-width: 640px) {
+  #backdrop { display: none; }
+
+  /* ---------- Narrow screens: side panels become drawers ---------- */
+  @media (max-width: 1250px) {
+    body { grid-template-columns: 270px minmax(0, 1fr); }
+    #info {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(360px, 92vw);
+      z-index: 20;
+      transform: translateX(100%);
+      transition: transform 0.2s ease;
+    }
+    body.show-info #info { transform: none; box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15); }
+    #info .close-panel, #toggle-info { display: inline-block; }
+    body.show-info #backdrop, body.show-history #backdrop {
+      display: block; position: fixed; inset: 0; z-index: 10; background: rgba(0, 0, 0, 0.3);
+    }
+  }
+  @media (max-width: 860px) {
     html { font-size: 17px; }
-    header { padding: 12px 16px; }
-    #key-box { margin-left: 0; width: 100%; }
+    body { grid-template-columns: minmax(0, 1fr); }
+    #history {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: min(310px, 88vw);
+      z-index: 20;
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+    }
+    body.show-history #history { transform: none; box-shadow: 8px 0 24px rgba(0, 0, 0, 0.15); }
+    #history .close-panel, #toggle-history { display: inline-block; }
+    header { padding: 10px 16px; }
+    main { padding: 20px 16px 28px; }
+    form { padding: 12px 16px 16px; }
+    #key-box { width: 100%; }
     #key-box input { flex: 1; }
     .msg.user { max-width: 92%; }
     .msg.bot { padding: 18px; }
-    .composer { flex-wrap: wrap; }
-    textarea { flex-basis: 100%; }
-    select { height: 52px; flex: 1; }
-    button#send { height: 52px; flex: 1; }
+    button#send { padding: 0 20px; }
   }
 </style>
 </head>
 <body>
-<header>
-  <div class="brand">
-    <div class="logo">R</div>
-    <div>
-      <h1>RAG Assistant</h1>
-      <div id="status">Connecting…</div>
-    </div>
-  </div>
-  <label id="key-box">API key <input id="api-key" type="password" autocomplete="off"></label>
-</header>
 
-<main id="scroll">
-  <div class="thread" id="thread">
-    <div class="empty" id="empty">
-      <h2>Ask your documents</h2>
-      <p>Answers come only from the indexed documents and cite their sources, like <span class="cite">1</span>.</p>
-      <div class="suggestions">
-        <button type="button" class="example">How many pilgrims died during the hajj in Saudi Arabia?</button>
-        <button type="button" class="example">On what grounds was Trump's classified documents case dismissed?</button>
-        <button type="button" class="example">What were AMD's marketing and advertising expenses in 2022?</button>
+<aside id="history" aria-label="Chat history">
+  <div class="side-head">
+    <h2>History</h2>
+    <button class="close-panel" type="button" data-close aria-label="Close">×</button>
+  </div>
+  <button id="new-chat" type="button">+ New chat</button>
+  <div class="side-body" id="chat-list"></div>
+</aside>
+
+<section class="chat">
+  <header>
+    <button class="toggle" id="toggle-history" type="button">☰ History</button>
+    <div class="brand">
+      <div class="logo">R</div>
+      <div>
+        <h1>RAG Assistant</h1>
+        <div id="status">Connecting…</div>
       </div>
     </div>
-  </div>
-</main>
+    <div class="header-right">
+      <label id="key-box">API key <input id="api-key" type="password" autocomplete="off"></label>
+      <button class="toggle" id="toggle-info" type="button">Documents</button>
+    </div>
+  </header>
 
-<form id="form">
-  <div class="composer">
-    <textarea id="question" placeholder="Ask a question…" maxlength="1000"></textarea>
-    <select id="top-k" title="Number of sources">
-      <option value="3">3 sources</option>
-      <option value="5" selected>5 sources</option>
-      <option value="8">8 sources</option>
-    </select>
-    <button id="send" type="submit">Ask</button>
+  <main id="scroll">
+    <div class="thread" id="thread"></div>
+  </main>
+
+  <form id="form">
+    <div class="composer">
+      <textarea id="question" placeholder="Ask a question…" maxlength="1000"></textarea>
+      <button id="send" type="submit">Ask</button>
+    </div>
+    <div class="hint">Enter to send · Shift + Enter for a new line</div>
+  </form>
+</section>
+
+<aside id="info" aria-label="About the documents">
+  <div class="side-head">
+    <h2>About the documents</h2>
+    <button class="close-panel" type="button" data-close aria-label="Close">×</button>
   </div>
-  <div class="hint">Enter to send · Shift + Enter for a new line</div>
-</form>
+  <div class="side-body" id="doc-info">
+    <p class="info-note">Loading…</p>
+  </div>
+</aside>
+
+<div id="backdrop"></div>
+
+<template id="empty-template">
+  <div class="empty">
+    <h2>Ask your documents</h2>
+    <p>Answers come only from the indexed documents and cite their sources, like <span class="cite">1</span>.</p>
+    <div class="suggestions">
+      <button type="button" class="example">How many pilgrims died during the hajj in Saudi Arabia?</button>
+      <button type="button" class="example">On what grounds was Trump's classified documents case dismissed?</button>
+      <button type="button" class="example">What were AMD's marketing and advertising expenses in 2022?</button>
+    </div>
+  </div>
+</template>
 
 <script>
-const thread = document.getElementById("thread");
-const scroll = document.getElementById("scroll");
-const form = document.getElementById("form");
-const question = document.getElementById("question");
-const send = document.getElementById("send");
-const topK = document.getElementById("top-k");
-const keyBox = document.getElementById("key-box");
-const keyInput = document.getElementById("api-key");
-const statusEl = document.getElementById("status");
+const $ = (id) => document.getElementById(id);
+const thread = $("thread");
+const scroll = $("scroll");
+const form = $("form");
+const question = $("question");
+const send = $("send");
+const keyBox = $("key-box");
+const keyInput = $("api-key");
+const statusEl = $("status");
+const chatList = $("chat-list");
+
+const STORAGE_KEY = "rag-chats";
+const MAX_CHATS = 50;
+const TOP_K = 5;
+const HISTORY_MESSAGES = 8;
+
+let chats = [];
+let currentId = null;
 let counter = 0;
+
+// ---------- Storage ----------
+function loadChats() {
+  try { chats = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch (e) { chats = []; }
+  if (!Array.isArray(chats)) chats = [];
+}
+function saveChats() {
+  chats.sort((a, b) => b.updated - a.updated);
+  chats = chats.slice(0, MAX_CHATS);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(chats)); } catch (e) {}
+}
+const currentChat = () => chats.find((c) => c.id === currentId);
 
 try { keyInput.value = localStorage.getItem("rag-api-key") || ""; } catch (e) {}
 keyInput.addEventListener("change", () => {
   try { localStorage.setItem("rag-api-key", keyInput.value); } catch (e) {}
 });
 
-async function checkHealth() {
-  try {
-    const res = await fetch("health");
-    const h = await res.json();
-    statusEl.textContent = h.status === "ok"
-      ? `${h.chunks.toLocaleString()} chunks indexed · ${h.retrieval}`
-      : "Loading…";
-    keyBox.style.display = h.api_key_required ? "flex" : "none";
-  } catch (e) {
-    statusEl.textContent = "API not reachable";
-  }
-}
-
+// ---------- Helpers ----------
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
 }
+function scrollDown() { scroll.scrollTop = scroll.scrollHeight; }
+function closePanels() { document.body.classList.remove("show-history", "show-info"); }
 
+// ---------- History panel ----------
+function dayLabel(time) {
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const day = 86400000;
+  if (time >= start.getTime()) return "Today";
+  if (time >= start.getTime() - day) return "Yesterday";
+  if (time >= start.getTime() - 7 * day) return "Previous 7 days";
+  return "Older";
+}
+
+function renderHistory() {
+  chatList.textContent = "";
+  if (!chats.length) {
+    chatList.appendChild(el("div", "no-history", "Your conversations will appear here."));
+    return;
+  }
+  let lastLabel = null;
+  for (const chat of chats) {
+    const label = dayLabel(chat.updated);
+    if (label !== lastLabel) {
+      chatList.appendChild(el("div", "day", label));
+      lastLabel = label;
+    }
+    const item = el("div", "chat-item" + (chat.id === currentId ? " active" : ""));
+    const open = el("button", "open", chat.title);
+    open.type = "button";
+    open.title = chat.title;
+    open.addEventListener("click", () => { openChat(chat.id); closePanels(); });
+    const del = el("button", "delete", "×");
+    del.type = "button";
+    del.title = "Delete this conversation";
+    del.addEventListener("click", () => deleteChat(chat.id));
+    item.append(open, del);
+    chatList.appendChild(item);
+  }
+}
+
+function showEmpty() {
+  thread.textContent = "";
+  thread.appendChild($("empty-template").content.cloneNode(true));
+  thread.querySelectorAll(".example").forEach((node) =>
+    node.addEventListener("click", () => ask(node.textContent))
+  );
+}
+
+function newChat() {
+  currentId = null;
+  showEmpty();
+  renderHistory();
+  question.focus();
+}
+
+function openChat(id) {
+  const chat = chats.find((c) => c.id === id);
+  if (!chat) return newChat();
+  currentId = id;
+  thread.textContent = "";
+  for (const message of chat.messages) {
+    if (message.role === "user") addMessage("user", message.text);
+    else renderBot(addMessage("bot", ""), message.data);
+  }
+  renderHistory();
+  scrollDown();
+}
+
+function deleteChat(id) {
+  chats = chats.filter((c) => c.id !== id);
+  saveChats();
+  if (id === currentId) newChat(); else renderHistory();
+}
+
+// ---------- Messages ----------
 function addMessage(kind, text) {
-  document.getElementById("empty")?.remove();
+  thread.querySelector(".empty")?.remove();
   const node = el("div", "msg " + kind, text);
   thread.appendChild(node);
-  scroll.scrollTop = scroll.scrollHeight;
+  scrollDown();
   return node;
 }
 
 // Insert the answer as text, turning [n] into clickable citations.
 function renderAnswer(container, answer, prefix) {
-  const parts = answer.split(/(\[\d+\])/g);
-  for (const part of parts) {
+  for (const part of answer.split(/(\[\d+\])/g)) {
     const m = part.match(/^\[(\d+)\]$/);
     if (m) {
       const a = el("a", "cite", m[1]);
       a.href = `#${prefix}-ref-${m[1]}`;
       a.addEventListener("click", (event) => {
         event.preventDefault();
-        const target = document.getElementById(`${prefix}-ref-${m[1]}`);
+        const target = $(`${prefix}-ref-${m[1]}`);
         if (!target) return;
         target.closest("details").open = true;
         target.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -346,61 +572,163 @@ function renderReferences(container, refs, prefix) {
     const info = [];
     if (r.pages && r.pages.length) info.push(`page ${r.pages.join(", ")}`);
     if (r.headings && r.headings.length) info.push(r.headings.join(" › "));
-    info.push(`score ${r.score.toFixed(3)}`);
-    box.appendChild(el("div", "info", info.join(" · ")));
+    if (info.length) box.appendChild(el("div", "ref-info", info.join(" · ")));
     box.appendChild(el("div", "excerpt", r.excerpt));
     details.appendChild(box);
   }
   container.appendChild(details);
 }
 
+// data: a /chat response, or { error } for a failed request.
+function renderBot(node, data) {
+  node.textContent = "";
+  node.classList.remove("pending", "error");
+  const prefix = `m${++counter}`;
+  // Show how a follow-up question was understood.
+  if (data.search_query && data.search_query.trim() !== (data.question || "").trim()) {
+    node.appendChild(el("div", "searched", `Searched for: ${data.search_query}`));
+  }
+  if (data.answer) {
+    renderAnswer(node, data.answer, prefix);
+  } else {
+    node.classList.add("error");
+    node.textContent = data.error || "No answer.";
+  }
+  renderReferences(node, data.references || [], prefix);
+  if (data.latency_ms) node.appendChild(el("div", "meta", `${(data.latency_ms / 1000).toFixed(1)} s`));
+}
+
+// chatId: conversation open when the question was asked (null = new one).
+function remember(chatId, stillOpen, text, data) {
+  let chat = chats.find((c) => c.id === chatId);
+  if (!chat) {
+    chat = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title: text, messages: [] };
+    chats.push(chat);
+    if (stillOpen) currentId = chat.id;
+  }
+  chat.messages.push({ role: "user", text }, { role: "bot", data });
+  chat.updated = Date.now();
+  saveChats();
+  renderHistory();
+}
+
+// Previous turns of the open conversation, sent so follow-ups make sense.
+function conversationHistory() {
+  const messages = [];
+  for (const m of currentChat()?.messages || []) {
+    if (m.role === "user") messages.push({ role: "user", content: m.text });
+    else if (m.data?.answer) messages.push({ role: "assistant", content: m.data.answer });
+  }
+  return messages.slice(-HISTORY_MESSAGES);
+}
+
 async function ask(text) {
+  const chatId = currentId;
+  const history = conversationHistory();
   addMessage("user", text);
-  const pending = addMessage("bot", "Searching the documents…");
+  const pending = addMessage("bot pending", "Searching the documents…");
   send.disabled = true;
 
   const headers = { "Content-Type": "application/json" };
   if (keyInput.value) headers["X-API-Key"] = keyInput.value;
 
+  let data;
   try {
     const res = await fetch("chat", {
       method: "POST",
       headers,
-      body: JSON.stringify({ question: text, top_k: Number(topK.value) }),
+      body: JSON.stringify({ question: text, history, top_k: TOP_K }),
     });
-    const data = await res.json().catch(() => ({}));
-    pending.textContent = "";
-
-    if (!res.ok) {
-      pending.classList.add("error");
-      pending.textContent = res.status === 401
-        ? "Invalid or missing API key. Enter the key at the top right."
-        : `Error ${res.status}: ${typeof data.detail === "string" ? data.detail : "request failed"}`;
-      return;
-    }
-
-    const prefix = `m${++counter}`;
-    if (data.answer) {
-      renderAnswer(pending, data.answer, prefix);
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) {
+      data = body;
+    } else if (res.status === 401) {
+      data = { error: "Invalid or missing API key. Enter the key at the top right." };
     } else {
-      pending.classList.add("error");
-      pending.textContent = data.error || "No answer.";
+      data = { error: `Error ${res.status}: ${typeof body.detail === "string" ? body.detail : "request failed"}` };
     }
-    renderReferences(pending, data.references || [], prefix);
-    pending.appendChild(el("div", "meta", `${(data.latency_ms / 1000).toFixed(1)} s`));
   } catch (e) {
-    pending.classList.add("error");
-    pending.textContent = "Could not reach the API. Is the server still running?";
-  } finally {
-    send.disabled = false;
-    scroll.scrollTop = scroll.scrollHeight;
+    data = { error: "Could not reach the API. Is the server still running?" };
+  }
+
+  renderBot(pending, data);
+  // Failed requests are shown but not kept in the history.
+  if (data.answer) remember(chatId, thread.contains(pending), text, data);
+  send.disabled = false;
+  scrollDown();
+}
+
+// ---------- Document information panel ----------
+function renderDocuments(info) {
+  const box = $("doc-info");
+  box.textContent = "";
+
+  const stats = el("div", "stats");
+  for (const [value, label] of [[info.documents, "documents"], [info.pages, "pages"]]) {
+    const stat = el("div", "stat");
+    stat.append(el("b", "", value.toLocaleString()), el("span", "", label));
+    stats.appendChild(stat);
+  }
+  box.appendChild(stats);
+
+  const groups = [...info.groups].sort((a, b) => b.documents - a.documents);
+  for (const group of groups) {
+    const card = el("div", "group");
+    const head = el("div", "group-head");
+    head.append(el("strong", "", group.name), el("span", "", `${group.documents} docs`));
+    const bar = el("div", "bar");
+    const fill = el("i");
+    fill.style.width = `${Math.max(2, (100 * group.documents) / info.documents)}%`;
+    bar.appendChild(fill);
+    card.append(head, bar, el("p", "", group.description));
+
+    const topics = el("div", "topics");
+    for (const t of group.topics) {
+      const chip = el("button", "topic", t.topic);
+      chip.type = "button";
+      chip.title = `Found in ${t.documents} documents — click to ask about it`;
+      chip.addEventListener("click", () => {
+        question.value = `What do the documents say about ${t.topic}?`;
+        closePanels();
+        question.focus();
+      });
+      topics.appendChild(chip);
+    }
+    card.appendChild(topics);
+    box.appendChild(card);
+  }
+
+  box.appendChild(el("p", "info-note",
+    "Topics are the keywords found in the most documents of each group. Click one to prepare a question."));
+}
+
+async function loadDocuments() {
+  try {
+    const res = await fetch("documents");
+    if (!res.ok) throw new Error();
+    renderDocuments(await res.json());
+  } catch (e) {
+    $("doc-info").textContent = "";
+    $("doc-info").appendChild(el("p", "info-note", "Document information is not available."));
   }
 }
 
+async function checkHealth() {
+  try {
+    const h = await (await fetch("health")).json();
+    statusEl.textContent = h.status === "ok" ? "Online" : "Loading…";
+    statusEl.classList.toggle("ok", h.status === "ok");
+    keyBox.style.display = h.api_key_required ? "flex" : "none";
+  } catch (e) {
+    statusEl.textContent = "API not reachable";
+  }
+}
+
+// ---------- Events ----------
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = question.value.trim();
-  if (text.length < 3 || send.disabled) return;
+  if (!text || send.disabled) return;
   question.value = "";
   ask(text);
 });
@@ -412,15 +740,20 @@ question.addEventListener("keydown", (event) => {
   }
 });
 
-document.querySelectorAll(".example").forEach((node) =>
-  node.addEventListener("click", () => ask(node.textContent))
-);
+$("new-chat").addEventListener("click", () => { newChat(); closePanels(); });
+$("toggle-history").addEventListener("click", () => document.body.classList.add("show-history"));
+$("toggle-info").addEventListener("click", () => document.body.classList.add("show-info"));
+$("backdrop").addEventListener("click", closePanels);
+document.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", closePanels));
 
+loadChats();
+newChat();
 checkHealth();
+loadDocuments();
 
 // A link like /?q=your+question asks the question directly.
 const initial = new URLSearchParams(location.search).get("q");
-if (initial && initial.trim().length >= 3) ask(initial.trim());
+if (initial && initial.trim()) ask(initial.trim());
 </script>
 </body>
 </html>
