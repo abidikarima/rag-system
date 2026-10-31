@@ -28,6 +28,8 @@ dependencies = [
     "huggingface-hub",
     "pyyaml",
     "scipy",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
 ]
 
 [tool.setuptools.packages.find]

@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Assistant</title>
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --panel: #ffffff;
+    --ink: #0f1b2d;
+    --muted: #5b6b80;
+    --line: #dfe5ee;
+    --accent: #2457d6;
+    --accent-ink: #ffffff;
+    --accent-soft: #e6edfd;
+    --user: #2457d6;
+    --ref-bg: #f7f9fc;
+    --error: #b42318;
+    --error-soft: #fef3f2;
+    --error-line: #fecdca;
+    --shadow: 0 1px 2px rgba(15, 27, 45, 0.05), 0 4px 16px rgba(15, 27, 45, 0.06);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f141c;
+      --panel: #171e29;
+      --ink: #e8edf5;
+      --muted: #9aa8bb;
+      --line: #2a3443;
+      --accent: #6d9bff;
+      --accent-ink: #0f141c;
+      --accent-soft: #1f2d47;
+      --user: #3a6ff0;
+      --ref-bg: #1c2431;
+      --error: #ffb4a8;
+      --error-soft: #3a1f1d;
+      --error-line: #5c2c27;
+      --shadow: none;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 18px; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--ink);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    padding: 14px 24px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 1.1rem;
+  }
+  header h1 { font-size: 1.3rem; margin: 0; line-height: 1.2; }
+  #status { font-size: 0.85rem; color: var(--muted); }
+  #key-box {
+    margin-left: auto;
+    display: none;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  #key-box input { width: 200px; font-size: 0.9rem; padding: 8px 12px; }
+
+  /* ---------- Conversation ---------- */
+  main { flex: 1; overflow-y: auto; padding: 28px 16px 36px; }
+  .thread { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+  .msg { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.user {
+    align-self: flex-end;
+    max-width: 80%;
+    padding: 14px 20px;
+    border-radius: 20px 20px 6px 20px;
+    background: var(--user);
+    color: #fff;
+    font-size: 1.05rem;
+  }
+  .msg.bot {
+    align-self: stretch;
+    padding: 22px 26px;
+    border-radius: 6px 20px 20px 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+  .msg.error { background: var(--error-soft); border-color: var(--error-line); color: var(--error); }
+  .msg .meta { margin-top: 14px; font-size: 0.8rem; color: var(--muted); white-space: normal; }
+
+  .cite {
+    display: inline-block;
+    min-width: 1.7em;
+    padding: 0 6px;
+    margin: 0 2px;
+    border-radius: 7px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.6;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: 0.1em;
+    cursor: pointer;
+  }
+  .cite:hover { background: var(--accent); color: var(--accent-ink); }
+
+  /* ---------- Sources ---------- */
+  details.refs { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); white-space: normal; }
+  details.refs summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.95rem;
+    list-style-position: inside;
+  }
+  .ref {
+    margin-top: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    background: var(--ref-bg);
+    border-radius: 10px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .ref.flash { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .ref .title { font-weight: 700; font-size: 0.98rem; overflow-wrap: anywhere; }
+  .ref .info { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+  .ref .excerpt { margin-top: 8px; }
+
+  /* ---------- Empty state ---------- */
+  .empty { text-align: center; color: var(--muted); margin: 9vh auto 0; max-width: 640px; }
+  .empty h2 { color: var(--ink); font-size: 1.8rem; margin: 0 0 10px; line-height: 1.25; }
+  .empty p { margin: 0 0 26px; font-size: 1.05rem; }
+  .suggestions { display: flex; flex-direction: column; gap: 10px; }
+  .example {
+    font: inherit;
+    font-size: 1rem;
+    text-align: left;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .example:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- Composer ---------- */
+  form {
+    padding: 16px 16px 20px;
+    background: var(--panel);
+    border-top: 1px solid var(--line);
+  }
+  .composer { max-width: 860px; margin: 0 auto; display: flex; gap: 10px; align-items: stretch; }
+  textarea, input, select {
+    font: inherit;
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  textarea {
+    flex: 1;
+    resize: none;
+    height: 60px;
+    padding: 15px 18px;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+  select { padding: 0 12px; font-size: 0.9rem; }
+  button#send {
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border: 0;
+    border-radius: 14px;
+    padding: 0 28px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+  }
+  button#send:disabled { opacity: 0.5; cursor: default; }
+  .hint { max-width: 860px; margin: 8px auto 0; font-size: 0.8rem; color: var(--muted); }
+
+  @media (max-width: 640px) {
+    html { font-size: 17px; }
+    header { padding: 12px 16px; }
+    #key-box { margin-left: 0; width: 100%; }
+    #key-box input { flex: 1; }
+    .msg.user { max-width: 92%; }
+    .msg.bot { padding: 18px; }
+    .composer { flex-wrap: wrap; }
+    textarea { flex-basis: 100%; }
+    select { height: 52px; flex: 1; }
+    button#send { height: 52px; flex: 1; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">R</div>
+    <div>
+      <h1>RAG Assistant</h1>
+      <div id="status">Connecting…</div>
+    </div>
+  </div>
+  <label id="key-box">API key <input id="api-key" type="password" autocomplete="off"></label>
+</header>
+
+<main id="scroll">
+  <div class="thread" id="thread">
+    <div class="empty" id="empty">
+      <h2>Ask your documents</h2>
+      <p>Answers come only from the indexed documents and cite their sources, like <span class="cite">1</span>.</p>
+      <div class="suggestions">
+        <button type="button" class="example">How many pilgrims died during the hajj in Saudi Arabia?</button>
+        <button type="button" class="example">On what grounds was Trump's classified documents case dismissed?</button>
+        <button type="button" class="example">What were AMD's marketing and advertising expenses in 2022?</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<form id="form">
+  <div class="composer">
+    <textarea id="question" placeholder="Ask a question…" maxlength="1000"></textarea>
+    <select id="top-k" title="Number of sources">
+      <option value="3">3 sources</option>
+      <option value="5" selected>5 sources</option>
+      <option value="8">8 sources</option>
+    </select>
+    <button id="send" type="submit">Ask</button>
+  </div>
+  <div class="hint">Enter to send · Shift + Enter for a new line</div>
+</form>
+
+<script>
+const thread = document.getElementById("thread");
+const scroll = document.getElementById("scroll");
+const form = document.getElementById("form");
+const question = document.getElementById("question");
+const send = document.getElementById("send");
+const topK = document.getElementById("top-k");
+const keyBox = document.getElementById("key-box");
+const keyInput = document.getElementById("api-key");
+const statusEl = document.getElementById("status");
+let counter = 0;
+
+try { keyInput.value = localStorage.getItem("rag-api-key") || ""; } catch (e) {}
+keyInput.addEventListener("change", () => {
+  try { localStorage.setItem("rag-api-key", keyInput.value); } catch (e) {}
+});
+
+async function checkHealth() {
+  try {
+    const res = await fetch("health");
+    const h = await res.json();
+    statusEl.textContent = h.status === "ok"
+      ? `${h.chunks.toLocaleString()} chunks indexed · ${h.retrieval}`
+      : "Loading…";
+    keyBox.style.display = h.api_key_required ? "flex" : "none";
+  } catch (e) {
+    statusEl.textContent = "API not reachable";
+  }
+}
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function addMessage(kind, text) {
+  document.getElementById("empty")?.remove();
+  const node = el("div", "msg " + kind, text);
+  thread.appendChild(node);
+  scroll.scrollTop = scroll.scrollHeight;
+  return node;
+}
+
+// Insert the answer as text, turning [n] into clickable citations.
+function renderAnswer(container, answer, prefix) {
+  const parts = answer.split(/(\[\d+\])/g);
+  for (const part of parts) {
+    const m = part.match(/^\[(\d+)\]$/);
+    if (m) {
+      const a = el("a", "cite", m[1]);
+      a.href = `#${prefix}-ref-${m[1]}`;
+      a.addEventListener("click", (event) => {
+        event.preventDefault();
+        const target = document.getElementById(`${prefix}-ref-${m[1]}`);
+        if (!target) return;
+        target.closest("details").open = true;
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        target.classList.add("flash");
+        setTimeout(() => target.classList.remove("flash"), 1200);
+      });
+      container.appendChild(a);
+    } else if (part) {
+      container.appendChild(document.createTextNode(part));
+    }
+  }
+}
+
+function renderReferences(container, refs, prefix) {
+  if (!refs.length) return;
+  const details = el("details", "refs");
+  details.appendChild(el("summary", "", `${refs.length} source${refs.length > 1 ? "s" : ""}`));
+  for (const r of refs) {
+    const box = el("div", "ref");
+    box.id = `${prefix}-ref-${r.number}`;
+    const file = (r.source || "unknown").split("/").pop();
+    box.appendChild(el("div", "title", `[${r.number}] ${file}`));
+    const info = [];
+    if (r.pages && r.pages.length) info.push(`page ${r.pages.join(", ")}`);
+    if (r.headings && r.headings.length) info.push(r.headings.join(" › "));
+    info.push(`score ${r.score.toFixed(3)}`);
+    box.appendChild(el("div", "info", info.join(" · ")));
+    box.appendChild(el("div", "excerpt", r.excerpt));
+    details.appendChild(box);
+  }
+  container.appendChild(details);
+}
+
+async function ask(text) {
+  addMessage("user", text);
+  const pending = addMessage("bot", "Searching the documents…");
+  send.disabled = true;
+
+  const headers = { "Content-Type": "application/json" };
+  if (keyInput.value) headers["X-API-Key"] = keyInput.value;
+
+  try {
+    const res = await fetch("chat", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ question: text, top_k: Number(topK.value) }),
+    });
+    const data = await res.json().catch(() => ({}));
+    pending.textContent = "";
+
+    if (!res.ok) {
+      pending.classList.add("error");
+      pending.textContent = res.status === 401
+        ? "Invalid or missing API key. Enter the key at the top right."
+        : `Error ${res.status}: ${typeof data.detail === "string" ? data.detail : "request failed"}`;
+      return;
+    }
+
+    const prefix = `m${++counter}`;
+    if (data.answer) {
+      renderAnswer(pending, data.answer, prefix);
+    } else {
+      pending.classList.add("error");
+      pending.textContent = data.error || "No answer.";
+    }
+    renderReferences(pending, data.references || [], prefix);
+    pending.appendChild(el("div", "meta", `${(data.latency_ms / 1000).toFixed(1)} s`));
+  } catch (e) {
+    pending.classList.add("error");
+    pending.textContent = "Could not reach the API. Is the server still running?";
+  } finally {
+    send.disabled = false;
+    scroll.scrollTop = scroll.scrollHeight;
+  }
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const text = question.value.trim();
+  if (text.length < 3 || send.disabled) return;
+  question.value = "";
+  ask(text);
+});
+
+question.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    form.requestSubmit();
+  }
+});
+
+document.querySelectorAll(".example").forEach((node) =>
+  node.addEventListener("click", () => ask(node.textContent))
+);
+
+checkHealth();
+
+// A link like /?q=your+question asks the question directly.
+const initial = new URLSearchParams(location.search).get("q");
+if (initial && initial.trim().length >= 3) ask(initial.trim());
+</script>
+</body>
+</html>
