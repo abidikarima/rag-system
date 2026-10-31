@@ -10,6 +10,11 @@ every chunk is scored with
 each score is min-max normalized over the collection, and the two are
 averaged with equal weights.
 
+Ranking uses the "Common first" fusion (best chunk@5 in the evaluation):
+each signal takes its own top `agreement_top_n` chunks; chunks found by
+both signals come first, then chunks found by one signal, then the rest.
+Inside each group, chunks are ordered by the averaged score.
+
 All vectors are loaded in memory at startup, which is fine for a few
 tens of thousands of chunks.
 """
@@ -98,12 +103,16 @@ class DenseSparseRetriever:
         sparse_model_name: str = "naver/splade-cocondenser-selfdistil",
         dense_weight: float = 0.5,
         sparse_weight: float = 0.5,
+        agreement_top_n: int | None = 10,
     ):
         if dense_weight < 0 or sparse_weight < 0 or dense_weight + sparse_weight == 0:
             raise ValueError("Weights must be >= 0 and not both 0.")
 
         self.dense_weight = dense_weight
         self.sparse_weight = sparse_weight
+
+        # None = plain score average, without "common first".
+        self.agreement_top_n = agreement_top_n
 
         # Models are not guaranteed to be thread-safe.
         self._lock = threading.Lock()
@@ -182,7 +191,18 @@ class DenseSparseRetriever:
             + self.sparse_weight * min_max(sparse_scores)
         ) / total
 
-        top = np.argsort(-scores)[:top_k]
+        if self.agreement_top_n:
+            n = min(self.agreement_top_n, len(scores))
+            votes = np.zeros_like(scores)
+            for signal in (dense_scores, sparse_scores):
+                votes[np.argpartition(-signal, n - 1)[:n]] += 1
+
+            # The averaged score is in [0, 1]: it never outweighs one vote.
+            ranking = 2.0 * votes + scores
+        else:
+            ranking = scores
+
+        top = np.argsort(-ranking)[:top_k]
 
         return [
             ScoredChunk(

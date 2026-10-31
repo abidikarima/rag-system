@@ -18,16 +18,18 @@ collection:
 
 Read the conversation and the new user message, then classify the message:
 
-- "documents": the user asks for information that could be found in such
-  documents, or asks a follow-up about a previous answer. Any factual
-  question about people, events, companies, laws, contracts, finance,
-  science or administration belongs here. When in doubt, choose "documents".
+- "documents": ANY question asking for facts or information (who, what,
+  when, where, how many, why...), on any subject, and any follow-up about a
+  previous answer. The list above only gives examples: the collection
+  contains many more topics, so never decide that a factual question is
+  outside it. The search will tell if the documents contain the answer.
 - "chitchat": greetings, thanks, goodbyes, or questions about the assistant
   itself (who are you, what can you do).
-- "off_topic": requests that are not a search in the documents: writing
-  poems, stories or code, math exercises, translation of the user's text,
-  personal advice, opinions, jokes, and general knowledge clearly unrelated
-  to the collection.
+- "off_topic": requests that are not asking for information: writing poems,
+  stories, emails or code, solving math exercises, translating or
+  correcting the user's text, personal advice, opinions, jokes.
+
+When in doubt, choose "documents".
 
 For "documents", rewrite the message as ONE standalone search question:
 replace pronouns and references ("he", "it", "that company", "the second

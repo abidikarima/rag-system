@@ -8,8 +8,14 @@ Signals (each one scores every chunk of the collection against the query):
     dense_summary    Qwen3 embedding of the chunk summary   (computed here, cached)
     sparse_summary   SPLADE vector of the chunk summary     (metadata "summary_sparse_embedding")
 
-Methods combine one or more signals: each signal's scores are min-max
-normalized over the collection, then averaged with the given weights.
+Methods combine one or more signals with one of three fusions:
+
+    score       each signal's scores are min-max normalized over the
+                collection, then averaged with the given weights
+    agreement   "common chunks first": chunks found in the top
+                AGREEMENT_TOP_N of several signals come first (more
+                signals = higher), ties are ordered by the score fusion
+    rrf         reciprocal rank fusion: sum of 1 / (RRF_K + rank)
 
 Metrics, for k in TOP_KS:
 
@@ -63,21 +69,79 @@ SUMMARY_DENSE_CACHE = Path("./.cache/summary_dense_embeddings.npz")
 
 TOP_KS = (5, 10)
 
-# Method name -> {signal: weight}
-METHODS: dict[str, dict[str, float]] = {
-    "Embedding only": {"dense_text": 1.0},
-    "Sparse only": {"sparse_text": 1.0},
-    "Embedding + sparse": {"dense_text": 0.5, "sparse_text": 0.5},
-    "Summary embedding": {"dense_summary": 1.0},
-    "Summary sparse": {"sparse_summary": 1.0},
-    "Summary embedding + sparse": {"dense_summary": 0.5, "sparse_summary": 0.5},
-    "All four": {
-        "dense_text": 0.25,
-        "sparse_text": 0.25,
-        "dense_summary": 0.25,
-        "sparse_summary": 0.25,
-    },
+# "agreement" fusion: a signal votes for the chunks in its own top N.
+AGREEMENT_TOP_N = 10
+
+# "rrf" fusion constant (60 is the usual value).
+RRF_K = 60
+
+TEXT_PAIR = {"dense_text": 0.5, "sparse_text": 0.5}
+ALL_FOUR = {
+    "dense_text": 0.25,
+    "sparse_text": 0.25,
+    "dense_summary": 0.25,
+    "sparse_summary": 0.25,
 }
+
+# Method name -> {"fusion": score | agreement | rrf, "weights": {signal: weight}}
+METHODS: dict[str, dict[str, Any]] = {
+    # --- Single signals --------------------------------------------------
+    "Embedding only": {"fusion": "score", "weights": {"dense_text": 1.0}},
+    "Sparse only": {"fusion": "score", "weights": {"sparse_text": 1.0}},
+    "Summary embedding": {"fusion": "score", "weights": {"dense_summary": 1.0}},
+    "Summary sparse": {"fusion": "score", "weights": {"sparse_summary": 1.0}},
+
+    # --- Pairs -----------------------------------------------------------
+    "Embedding + sparse": {"fusion": "score", "weights": TEXT_PAIR},
+    "Summary embedding + sparse": {
+        "fusion": "score",
+        "weights": {"dense_summary": 0.5, "sparse_summary": 0.5},
+    },
+    "Embedding + summary embedding": {
+        "fusion": "score",
+        "weights": {"dense_text": 0.5, "dense_summary": 0.5},
+    },
+    "Sparse + summary sparse": {
+        "fusion": "score",
+        "weights": {"sparse_text": 0.5, "sparse_summary": 0.5},
+    },
+    "Embedding + summary sparse": {
+        "fusion": "score",
+        "weights": {"dense_text": 0.5, "sparse_summary": 0.5},
+    },
+    "Sparse + summary embedding": {
+        "fusion": "score",
+        "weights": {"sparse_text": 0.5, "dense_summary": 0.5},
+    },
+
+    # --- Three signals (all four minus one) -------------------------------
+    "All but summary sparse": {
+        "fusion": "score",
+        "weights": {"dense_text": 1 / 3, "sparse_text": 1 / 3, "dense_summary": 1 / 3},
+    },
+    "All but summary embedding": {
+        "fusion": "score",
+        "weights": {"dense_text": 1 / 3, "sparse_text": 1 / 3, "sparse_summary": 1 / 3},
+    },
+    "All but sparse": {
+        "fusion": "score",
+        "weights": {"dense_text": 1 / 3, "dense_summary": 1 / 3, "sparse_summary": 1 / 3},
+    },
+    "All but embedding": {
+        "fusion": "score",
+        "weights": {"sparse_text": 1 / 3, "dense_summary": 1 / 3, "sparse_summary": 1 / 3},
+    },
+
+    "All four": {"fusion": "score", "weights": ALL_FOUR},
+
+    # --- Other fusions -----------------------------------------------------
+    "Common first: embedding + sparse": {"fusion": "agreement", "weights": TEXT_PAIR},
+    "Common first: all four": {"fusion": "agreement", "weights": ALL_FOUR},
+    "RRF: embedding + sparse": {"fusion": "rrf", "weights": TEXT_PAIR},
+    "RRF: all four": {"fusion": "rrf", "weights": ALL_FOUR},
+}
+
+NAME_WIDTH = max(len(name) for name in METHODS) + 2
 
 
 # =============================================================
@@ -239,7 +303,20 @@ def min_max(scores: np.ndarray) -> np.ndarray:
     return (scores - low) / span
 
 
-def combine(
+def ranks(scores: np.ndarray) -> np.ndarray:
+    """
+    Rank of every chunk for every query (1 = best), shape (queries, chunks).
+    """
+
+    order = np.argsort(-scores, axis=1)
+    result = np.empty_like(order)
+    rows = np.arange(scores.shape[0])[:, None]
+    result[rows, order] = np.arange(1, scores.shape[1] + 1)
+
+    return result
+
+
+def score_fusion(
     signals: dict[str, np.ndarray],
     weights: dict[str, float],
 ) -> np.ndarray:
@@ -257,6 +334,55 @@ def combine(
         weight * min_max(signals[name])
         for name, weight in weights.items()
     ) / total
+
+
+def agreement_fusion(
+    signals: dict[str, np.ndarray],
+    weights: dict[str, float],
+) -> np.ndarray:
+    """
+    Common chunks first: each signal votes for its own top AGREEMENT_TOP_N.
+
+    Chunks with more votes always rank above chunks with fewer votes
+    (chunks found by every signal come first); chunks with the same
+    number of votes are ordered by the score fusion.
+    """
+
+    votes = sum(
+        (ranks(signals[name]) <= AGREEMENT_TOP_N).astype(np.float32)
+        for name in weights
+    )
+
+    # The fused score is in [0, 1]: it can never outweigh one vote.
+    return 2.0 * votes + score_fusion(signals, weights)
+
+
+def rrf_fusion(
+    signals: dict[str, np.ndarray],
+    weights: dict[str, float],
+) -> np.ndarray:
+    """
+    Reciprocal rank fusion: only the rank in each signal matters.
+    """
+
+    return sum(
+        weight / (RRF_K + ranks(signals[name]))
+        for name, weight in weights.items()
+    )
+
+
+FUSIONS = {
+    "score": score_fusion,
+    "agreement": agreement_fusion,
+    "rrf": rrf_fusion,
+}
+
+
+def combine(
+    signals: dict[str, np.ndarray],
+    method: dict[str, Any],
+) -> np.ndarray:
+    return FUSIONS[method["fusion"]](signals, method["weights"])
 
 
 # =============================================================
@@ -366,7 +492,8 @@ def evaluate(
                 }
                 for name, counts in by_complexity.items()
             },
-            "weights": METHODS[name],
+            "fusion": METHODS[name]["fusion"],
+            "weights": METHODS[name]["weights"],
         }
 
     return {"summary": summary, "details": details}
@@ -375,7 +502,7 @@ def evaluate(
 def print_table(summary: dict[str, Any], total: int) -> None:
     metrics = [f"chunk@{k}" for k in TOP_KS] + [f"doc@{k}" for k in TOP_KS]
 
-    header = f"{'Method':<30}" + \
+    header = f"{'Method':<{NAME_WIDTH}}" + \
         "".join(f"{m:>10}" for m in metrics) + f"{'MRR':>8}"
 
     print()
@@ -387,7 +514,7 @@ def print_table(summary: dict[str, Any], total: int) -> None:
 
     for name, result in summary.items():
         print(
-            f"{name:<30}"
+            f"{name:<{NAME_WIDTH}}"
             + "".join(f"{result[m]:>10.2%}" for m in metrics)
             + f"{result['mrr']:>8.3f}"
         )
@@ -407,7 +534,7 @@ def print_table(summary: dict[str, Any], total: int) -> None:
         return
 
     columns = [(level, k) for level in levels for k in TOP_KS]
-    header = f"{'chunk@k by difficulty':<30}" + "".join(
+    header = f"{'chunk@k by difficulty':<{NAME_WIDTH}}" + "".join(
         f"{f'{level}@{k}':>11}" for level, k in columns
     )
 
@@ -417,7 +544,7 @@ def print_table(summary: dict[str, Any], total: int) -> None:
 
     for name, result in summary.items():
         print(
-            f"{name:<30}"
+            f"{name:<{NAME_WIDTH}}"
             + "".join(
                 f"{result['by_complexity'].get(level, {}).get(f'chunk@{k}', 0):>11.2%}"
                 for level, k in columns
@@ -550,8 +677,8 @@ def main() -> None:
     }
 
     scores_by_method = {
-        name: combine(signals, weights)
-        for name, weights in METHODS.items()
+        name: combine(signals, method)
+        for name, method in METHODS.items()
     }
 
     # ---------------------------------------------------------

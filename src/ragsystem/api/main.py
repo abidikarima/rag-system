@@ -7,8 +7,9 @@ GET  /documents overview of the indexed documents (groups, main topics)
 GET  /health    status and collection size
 GET  /docs   interactive page to test the API in a browser
 
-Retrieval uses the best method of the evaluation: dense embedding +
-SPLADE sparse vector on the chunk text (see docs/rag_evaluation.md).
+Retrieval uses the best method of the evaluation, "Common first: embedding
++ sparse": dense embedding + SPLADE sparse vector on the chunk text, chunks
+found by both signals ranked first (see docs/rag_evaluation.md).
 
 Each message first goes through a router (one LLM call) that uses the
 conversation to:
@@ -270,10 +271,13 @@ def build_sources(chunks: list[ScoredChunk]) -> str:
 
 def normalize_citations(answer: str) -> str:
     """
-    gpt-oss models often cite as 【1】; return the [1] format promised by the API.
+    gpt-oss models often cite as 【1】 or 【1†L1-L4】; return the [1] format
+    promised by the API.
     """
 
-    return re.sub(r"【\s*(\d+)\s*】", r"[\1]", answer)
+    answer = re.sub(r"【\s*(\d+)[^】]*】", r"[\1]", answer)
+
+    return re.sub(r"\[(\d+)†[^\]]*\]", r"[\1]", answer)
 
 
 def document_group(file_name: str) -> tuple[str, str]:
@@ -408,7 +412,7 @@ def health() -> dict[str, Any]:
         "status": "ok" if retriever else "loading",
         "chunks": retriever.size if retriever else 0,
         "chunks_without_sparse_vector": retriever.missing_sparse if retriever else 0,
-        "retrieval": "dense + sparse (50/50)",
+        "retrieval": "dense + sparse, common first",
         "api_key_required": bool(API_KEY),
     }
 

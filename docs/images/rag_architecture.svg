@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 790" width="1280" height="790" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>RAG system architecture: indexing and question answering with common-first dense + sparse retrieval</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6b80"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2457d6"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f1b2d" flood-opacity="0.08"/>
+    </filter>
+    <style>
+      .box { fill: #ffffff; stroke: #d3dbe8; stroke-width: 1.2; filter: url(#shadow); }
+      .h { font-size: 16px; font-weight: 700; fill: #0f1b2d; }
+      .t { font-size: 13px; fill: #5b6b80; }
+      .s { font-size: 12px; fill: #5b6b80; }
+      .lane-title { font-size: 18px; font-weight: 800; fill: #0f1b2d; }
+      .lane-sub { font-size: 13px; fill: #5b6b80; }
+      .flow { stroke: #5b6b80; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+      .flow-blue { stroke: #2457d6; stroke-width: 2.2; fill: none; marker-end: url(#arrow-blue); }
+      .label { font-size: 12px; fill: #5b6b80; font-style: italic; }
+      .pill-text { font-size: 12.5px; font-weight: 600; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="790" fill="#ffffff"/>
+
+  <!-- ================= Lane 1: indexing ================= -->
+  <rect x="20" y="20" width="1240" height="240" rx="18" fill="#f5f8ff" stroke="#d6e0f5"/>
+  <text x="44" y="54" class="lane-title">1 · Indexing</text>
+  <text x="160" y="54" class="lane-sub">offline · scripts/update_rag_data.py</text>
+
+  <!-- PDFs -->
+  <rect x="44" y="82" width="190" height="140" rx="14" class="box"/>
+  <text x="139" y="118" text-anchor="middle" class="h">PDF documents</text>
+  <text x="139" y="144" text-anchor="middle" class="t">OHR-Bench corpus</text>
+  <text x="139" y="164" text-anchor="middle" class="t">news, contracts, reports,</text>
+  <text x="139" y="182" text-anchor="middle" class="t">papers, manuals…</text>
+  <text x="139" y="206" text-anchor="middle" class="s">auto-downloaded to data/</text>
+
+  <!-- Docling -->
+  <rect x="274" y="82" width="190" height="140" rx="14" class="box"/>
+  <text x="369" y="118" text-anchor="middle" class="h">Docling</text>
+  <text x="369" y="144" text-anchor="middle" class="t">PDF parsing</text>
+  <text x="369" y="164" text-anchor="middle" class="t">hybrid chunking</text>
+  <text x="369" y="182" text-anchor="middle" class="t">(headings, pages, tables)</text>
+
+  <!-- LLM metadata -->
+  <rect x="504" y="82" width="190" height="140" rx="14" class="box"/>
+  <text x="599" y="118" text-anchor="middle" class="h">LLM metadata</text>
+  <text x="599" y="144" text-anchor="middle" class="t">summary + keywords</text>
+  <text x="599" y="164" text-anchor="middle" class="t">for every chunk</text>
+  <text x="599" y="206" text-anchor="middle" class="s">Groq · gpt-oss-120b</text>
+
+  <!-- Vectorize -->
+  <rect x="734" y="82" width="250" height="140" rx="14" class="box"/>
+  <text x="859" y="114" text-anchor="middle" class="h">Vectors per chunk</text>
+  <rect x="746" y="130" width="226" height="36" rx="18" fill="#e6edfd"/>
+  <text x="859" y="153" text-anchor="middle" class="pill-text" fill="#1d47b3">Dense · Qwen3 · 1024 dims</text>
+  <rect x="746" y="174" width="226" height="36" rx="18" fill="#fdf0e2"/>
+  <text x="859" y="197" text-anchor="middle" class="pill-text" fill="#a1500c">Sparse · SPLADE · 30,522 terms</text>
+
+  <!-- Chroma -->
+  <g filter="url(#shadow)">
+    <path d="M1024,104 a96,18 0 0 1 192,0 v100 a96,18 0 0 1 -192,0 z" fill="#ffffff" stroke="#d3dbe8" stroke-width="1.2"/>
+    <ellipse cx="1120" cy="104" rx="96" ry="18" fill="#eef2f8" stroke="#d3dbe8" stroke-width="1.2"/>
+  </g>
+  <text x="1120" y="152" text-anchor="middle" class="h">ChromaDB</text>
+  <text x="1120" y="176" text-anchor="middle" class="t">5,608 chunks</text>
+  <text x="1120" y="196" text-anchor="middle" class="t">text + metadata + vectors</text>
+
+  <path d="M234,152 H270" class="flow"/>
+  <path d="M464,152 H500" class="flow"/>
+  <path d="M694,152 H730" class="flow"/>
+  <path d="M984,152 H1020" class="flow"/>
+
+  <!-- ================= Lane 2: answering ================= -->
+  <rect x="20" y="290" width="1240" height="480" rx="18" fill="#f7f9fc" stroke="#dfe5ee"/>
+  <text x="44" y="324" class="lane-title">2 · Answering a question</text>
+  <text x="285" y="324" class="lane-sub">FastAPI · POST /chat · web chat interface</text>
+
+  <!-- stored vectors feed the searches -->
+  <path d="M1120,224 V268 H640 V354" stroke="#9aa8bb" stroke-width="1.6" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>
+  <text x="890" y="285" text-anchor="middle" class="label">stored chunk vectors</text>
+
+  <!-- Question -->
+  <rect x="44" y="404" width="170" height="110" rx="14" class="box"/>
+  <text x="129" y="442" text-anchor="middle" class="h">Question</text>
+  <text x="129" y="466" text-anchor="middle" class="t">+ last messages of</text>
+  <text x="129" y="484" text-anchor="middle" class="t">the conversation</text>
+
+  <!-- Router -->
+  <rect x="250" y="394" width="200" height="130" rx="14" class="box"/>
+  <text x="350" y="428" text-anchor="middle" class="h">Router (LLM)</text>
+  <text x="350" y="454" text-anchor="middle" class="t">rewrites follow-ups as a</text>
+  <text x="350" y="472" text-anchor="middle" class="t">standalone question</text>
+  <text x="350" y="500" text-anchor="middle" class="s">"and in 2021?" → "AMD … 2021?"</text>
+
+  <!-- Direct reply -->
+  <rect x="250" y="590" width="200" height="96" rx="14" fill="#f1f3f7" stroke="#d3dbe8" stroke-dasharray="5 4"/>
+  <text x="350" y="622" text-anchor="middle" class="h" font-size="15">Direct reply</text>
+  <text x="350" y="646" text-anchor="middle" class="t">greeting or off-topic:</text>
+  <text x="350" y="664" text-anchor="middle" class="t">no search, no sources</text>
+
+  <!-- Dense search -->
+  <rect x="530" y="358" width="240" height="100" rx="14" class="box"/>
+  <rect x="530" y="358" width="8" height="100" rx="4" fill="#2457d6"/>
+  <text x="554" y="390" class="h">Dense search</text>
+  <text x="554" y="414" class="t">Qwen3 query embedding</text>
+  <text x="554" y="432" class="t">cosine similarity → <tspan font-weight="700" fill="#1d47b3">top 10</tspan></text>
+
+  <!-- Sparse search -->
+  <rect x="530" y="480" width="240" height="100" rx="14" class="box"/>
+  <rect x="530" y="480" width="8" height="100" rx="4" fill="#d9700f"/>
+  <text x="554" y="512" class="h">Sparse search</text>
+  <text x="554" y="536" class="t">SPLADE query vector</text>
+  <text x="554" y="554" class="t">dot product → <tspan font-weight="700" fill="#a1500c">top 10</tspan></text>
+
+  <!-- Common first fusion -->
+  <rect x="816" y="352" width="250" height="234" rx="16" fill="#ffffff" stroke="#2457d6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="941" y="384" text-anchor="middle" class="h">Common-first fusion</text>
+  <text x="941" y="404" text-anchor="middle" class="s">ranking of the chunks</text>
+
+  <rect x="834" y="418" width="214" height="40" rx="10" fill="#e3f4ec"/>
+  <circle cx="856" cy="438" r="11" fill="#12805c"/>
+  <text x="856" y="442.5" text-anchor="middle" font-size="12" font-weight="800" fill="#ffffff">1</text>
+  <text x="876" y="436" class="pill-text" fill="#0b5c41">in both top 10</text>
+  <circle cx="1012" cy="431" r="5" fill="#2457d6"/><circle cx="1026" cy="431" r="5" fill="#d9700f"/>
+  <text x="876" y="451" font-size="11" fill="#2f6b55">found by dense AND sparse</text>
+
+  <rect x="834" y="466" width="214" height="40" rx="10" fill="#fdf3e3"/>
+  <circle cx="856" cy="486" r="11" fill="#c27c0e"/>
+  <text x="856" y="490.5" text-anchor="middle" font-size="12" font-weight="800" fill="#ffffff">2</text>
+  <text x="876" y="484" class="pill-text" fill="#7a4b06">in one top 10</text>
+  <circle cx="1019" cy="479" r="5" fill="#9aa8bb"/>
+  <text x="876" y="499" font-size="11" fill="#7a5a26">found by only one search</text>
+
+  <rect x="834" y="514" width="214" height="40" rx="10" fill="#eef1f6"/>
+  <circle cx="856" cy="534" r="11" fill="#7d8ba0"/>
+  <text x="856" y="538.5" text-anchor="middle" font-size="12" font-weight="800" fill="#ffffff">3</text>
+  <text x="876" y="539" class="pill-text" fill="#4a5568">all other chunks</text>
+
+  <text x="941" y="574" text-anchor="middle" class="s">same group → mean of normalized scores</text>
+
+  <!-- Answer LLM -->
+  <rect x="1100" y="372" width="140" height="194" rx="14" class="box"/>
+  <text x="1170" y="404" text-anchor="middle" class="h">Answer LLM</text>
+  <text x="1170" y="428" text-anchor="middle" class="t">top 5 chunks</text>
+  <text x="1170" y="446" text-anchor="middle" class="t">as sources</text>
+  <text x="1170" y="474" text-anchor="middle" class="t">answers only</text>
+  <text x="1170" y="492" text-anchor="middle" class="t">from them, cites</text>
+  <rect x="1132" y="504" width="30" height="22" rx="6" fill="#e6edfd"/>
+  <text x="1147" y="520" text-anchor="middle" font-size="12" font-weight="700" fill="#1d47b3">[1]</text>
+  <rect x="1170" y="504" width="30" height="22" rx="6" fill="#e6edfd"/>
+  <text x="1185" y="520" text-anchor="middle" font-size="12" font-weight="700" fill="#1d47b3">[2]</text>
+  <text x="1170" y="550" text-anchor="middle" class="s">Groq · gpt-oss</text>
+
+  <!-- Output -->
+  <rect x="816" y="616" width="424" height="70" rx="14" fill="#2457d6"/>
+  <text x="1028" y="645" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Answer + cited references</text>
+  <text x="1028" y="668" text-anchor="middle" font-size="13" fill="#dce6ff">source PDF · pages · headings · excerpt</text>
+
+  <!-- flows lane 2 -->
+  <path d="M214,459 H246" class="flow"/>
+  <path d="M350,524 V586" class="flow"/>
+  <text x="358" y="560" class="label">chit-chat / off-topic</text>
+  <path d="M450,440 H490 V408 H526" class="flow-blue"/>
+  <path d="M490,440 V530 H526" class="flow-blue"/>
+  <text x="460" y="398" class="label">documents</text>
+  <path d="M770,408 H792 V440 H812" class="flow-blue"/>
+  <path d="M770,530 H792 V500 H812" class="flow-blue"/>
+  <path d="M1066,469 H1096" class="flow-blue"/>
+  <path d="M1170,566 V612" class="flow-blue"/>
+
+  <!-- Evaluation strip -->
+  <rect x="44" y="712" width="1196" height="40" rx="10" fill="#ffffff" stroke="#dfe5ee"/>
+  <text x="64" y="737" font-size="13" fill="#5b6b80"><tspan font-weight="700" fill="#0f1b2d">Evaluation</tspan> (300 questions from 300 documents, Claude test set):  correct chunk in top 5 <tspan font-weight="800" fill="#12805c">98.0%</tspan>  ·  in top 10 <tspan font-weight="800" fill="#12805c">98.7%</tspan>  ·  MRR <tspan font-weight="800" fill="#12805c">0.891</tspan>  ·  details in docs/rag_evaluation.md</text>
+</svg>

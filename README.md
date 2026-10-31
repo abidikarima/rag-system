@@ -8,11 +8,14 @@ documents).
   an LLM (Groq) and stored in Chroma with three vectors per chunk: a dense
   embedding (Qwen3-Embedding) and SPLADE sparse vectors of the text and of
   the summary.
-- **Retrieval:** dense embedding + SPLADE sparse vector on the chunk text, the
-  best method in the [evaluation](docs/rag_evaluation.md).
+- **Retrieval:** a dense (Qwen3) search and a sparse (SPLADE) search each
+  return their top 10 chunks; chunks found by both are ranked first ("common
+  first"), the best method in the [evaluation](docs/rag_evaluation.md).
 - **Answering:** a FastAPI service with a web chat interface. The LLM answers
   from the retrieved chunks and cites them; the references are returned with
   the answer.
+
+![RAG architecture: indexing, router, dense and sparse search, common-first fusion, answer with citations](docs/images/rag_architecture.svg)
 
 ## Project structure
 
@@ -20,7 +23,7 @@ documents).
 ragsystem
 ├── README.md
 ├── pyproject.toml / uv.lock      # Dependencies (uv)
-├── docs/                         # Documentation (data, test data, evaluation)
+├── docs/                         # Documentation (data, test data, evaluation) + images/
 ├── scripts/
 │   ├── update_rag_data.py        # Pipeline: download -> parse -> chunk -> embed -> Chroma
 │   └── run.py                    # Shortcut for update_rag_data.py
@@ -50,8 +53,9 @@ ragsystem
   chunked, embedded and stored.
 - [Test data](docs/test_data.md): how the 300 retrieval test questions are
   generated (random documents, 3 difficulty levels).
-- [Evaluation](docs/rag_evaluation.md): comparison of 7 retrieval methods on
-  the Claude and Groq test sets.
+- [Evaluation](docs/rag_evaluation.md): comparison of 19 retrieval methods
+  (signal combinations, "common first" and RRF fusions) on the Claude and
+  Groq test sets.
 
 ## Setup
 
@@ -99,8 +103,16 @@ To only download the data: `uv run python -m ragsystem.utils.data_downloader`.
 ## Chatbot API
 
 A REST API that answers questions from the documents and returns the
-references it used. Retrieval uses the best method of the evaluation:
-dense embedding + SPLADE sparse vector on the chunk text.
+references it used. Retrieval uses the best method of the evaluation,
+**common first: embedding + sparse** (98.0% of the expected chunks in the top
+5 on the Claude test set):
+
+1. The dense search (Qwen3 embedding, cosine) and the sparse search (SPLADE,
+   dot product) each take their own top 10 chunks.
+2. Chunks found by **both** searches are ranked first, then chunks found by
+   one search, then all the others.
+3. Inside each group, chunks are ordered by the average of the two
+   normalized scores. The top 5 are sent to the LLM as sources.
 
 ```bash
 uv run uvicorn ragsystem.api.main:app --host 0.0.0.0 --port 8000
@@ -196,7 +208,7 @@ commands, and it changes every time the tunnel restarts.
 # Generate a test set (Groq LLM, 300 questions)
 uv run python -m ragsystem.utils.generate_test_questions
 
-# Compare the 7 retrieval methods on a test set
+# Compare the 19 retrieval methods on a test set
 uv run python -m ragsystem.evaluation.evaluate_combinations --test-file test_data/groq_test_questions.jsonl
 ```
 

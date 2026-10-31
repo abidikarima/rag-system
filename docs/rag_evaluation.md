@@ -2,7 +2,8 @@
 
 This document reports how well the retrieval part of the RAG system finds the
 right chunk for a question. Seven retrieval methods are compared on two test
-sets of 300 questions each:
+sets of 300 questions each, then twelve more combinations and fusions are
+tested in [Other combinations and fusions](#other-combinations-and-fusions):
 
 - **Claude test set**: `test_data/claude_test_questions.jsonl`, questions
   written by Claude.
@@ -151,4 +152,86 @@ per-difficulty tables of the two sets therefore cover mostly different chunks.
 | Question words found in the chunk: `medium` |        67% |        58% |
 | Question words found in the chunk: `hard`   |        62% |        51% |
 
+
+---
+
+# Other combinations and fusions
+
+The four signals give 15 possible combinations; the seven methods above test
+seven of them. This section adds the eight missing combinations and two other
+ways of fusing the results. Same script, same two test sets; all methods are
+in the same output files.
+
+## Methods
+
+**Missing score combinations.** Scores normalized and averaged with equal
+weights, as above:
+
+| Method                        | Signals                                              |
+| ----------------------------- | ---------------------------------------------------- |
+| Embedding + summary embedding | dense text + dense summary                           |
+| Sparse + summary sparse       | sparse text + sparse summary                         |
+| Embedding + summary sparse    | dense text + sparse summary                          |
+| Sparse + summary embedding    | sparse text + dense summary                          |
+| All but summary sparse        | dense text + sparse text + dense summary             |
+| All but summary embedding     | dense text + sparse text + sparse summary            |
+| All but sparse                | dense text + dense summary + sparse summary          |
+| All but embedding             | sparse text + dense summary + sparse summary         |
+
+**Common first (agreement fusion).** Each signal retrieves its own top 10
+chunks. Chunks found by every signal are ranked first, then chunks found by
+fewer signals, then the rest. Chunks found by the same number of signals are
+ordered by the normalized score average. Tested on the text pair (embedding +
+sparse) and on all four signals.
+
+**RRF (reciprocal rank fusion).** Each chunk gets `sum(1 / (60 + rank))` over
+the signals: only the ranks are used, not the scores. Tested on the same two
+signal sets.
+
+## Results
+
+`Embedding + sparse` is repeated for reference.
+
+| Method                           | chunk@5 Claude | chunk@5 Groq | chunk@10 Claude | chunk@10 Groq | MRR Claude |  MRR Groq |
+| -------------------------------- | -------------: | -----------: | --------------: | ------------: | ---------: | --------: |
+| Embedding + sparse (reference)   |         97.67% |       96.33% |          98.67% |        96.67% |      0.894 |     0.899 |
+| Embedding + summary embedding    |         95.00% |       93.33% |          97.00% |        96.33% |      0.848 |     0.857 |
+| Sparse + summary sparse          |         97.33% |       94.67% |          98.00% |        96.67% |      0.881 |     0.889 |
+| Embedding + summary sparse       |         94.67% |       93.00% |          97.00% |        95.67% |      0.862 |     0.854 |
+| Sparse + summary embedding       |         97.33% |       96.33% |          98.33% |        97.33% |      0.884 |     0.898 |
+| All but summary sparse           |         97.67% |       96.33% |          98.33% |        97.33% |      0.885 |     0.902 |
+| All but summary embedding        |         97.33% |       95.67% |          98.00% |        97.33% |      0.897 |     0.903 |
+| All but sparse                   |         94.33% |       92.67% |          96.67% |        95.00% |      0.856 |     0.847 |
+| All but embedding                |         96.67% |       94.67% |          98.00% |        97.33% |      0.873 |     0.881 |
+| Common first: embedding + sparse |         98.00% |       96.33% |          98.67% |        97.33% |      0.891 |     0.891 |
+| Common first: all four           |         96.00% |       94.67% |          98.33% |        97.33% |      0.867 |     0.869 |
+| RRF: embedding + sparse          |         96.67% |       95.00% |          98.00% |        96.33% |      0.873 |     0.888 |
+| RRF: all four                    |         94.00% |       93.33% |          97.67% |        95.33% |      0.848 |     0.845 |
+
+Per-difficulty results are printed by the script and saved in the result
+files.
+
+## Conclusions
+
+- **No method clearly beats Embedding + sparse.** The best new methods
+  (`Common first: embedding + sparse`, `All but summary sparse`,
+  `All but summary embedding`, `Sparse + summary embedding`) are within
+  **±1 to 2 questions out of 300** of it. Those differences are too small to
+  be meaningful, and they go in both directions depending on the metric and
+  the test set.
+- **Common first** puts one more question in the top 5 on the Claude set
+  (98.00% vs 97.67%) and two more in the top 10 on the Groq set. Its MRR is
+  a little lower (0.891 vs 0.894 / 0.899), because a chunk found by both
+  signals can be pushed above a chunk that one signal ranked first.
+- **Adding summary signals** to the text signals does not help: the
+  three-signal combinations that keep both text signals score like the text
+  pair, and every combination
+  without the text sparse vector (`All but sparse`, `Embedding + summary
+  embedding`, `Embedding + summary sparse`) is clearly weaker.
+- **RRF is worse than score fusion** on both sets: using only ranks loses
+  the information of how much better the first chunk is than the others.
+- The API uses **Common first: embedding + sparse**. It has the best
+  chunk@5 on the Claude set and ties on the Groq set, and needs only the two
+  text signals at query time (no summary vectors). The gain over plain
+  `Embedding + sparse` is small (see above), so both are good choices.
 
