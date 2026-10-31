@@ -10,7 +10,7 @@ documents).
   the summary.
 - **Retrieval:** a dense (Qwen3) search and a sparse (SPLADE) search each
   return their top 10 chunks; chunks found by both are ranked first ("common
-  first"), the best method in the [evaluation](docs/rag_evaluation.md).
+  first").
 - **Answering:** a FastAPI service with a web chat interface. The LLM answers
   from the retrieved chunks and cites them; the references are returned with
   the answer.
@@ -51,11 +51,10 @@ ragsystem
 
 - [Data](docs/data.md): what the corpus contains, and how it is downloaded,
   chunked, embedded and stored.
-- [Test data](docs/test_data.md): how the 300 retrieval test questions are
-  generated (random documents, 3 difficulty levels).
-- [Evaluation](docs/rag_evaluation.md): comparison of 19 retrieval methods
-  (signal combinations, "common first" and RRF fusions) on the Claude and
-  Groq test sets.
+- [Test data](docs/test_data.md): how the retrieval test questions are
+  generated, and their format.
+- [Evaluation](docs/rag_evaluation.md): results of 19 retrieval methods
+  on the Claude and Groq test sets.
 
 ## Setup
 
@@ -80,15 +79,10 @@ uv run python scripts/update_rag_data.py --chroma-dir ./chroma_db_v1
 Without `--chroma-dir`, the index is written to `./chroma_db`. The API reads
 `./chroma_db_v1` by default (see `RAG_CHROMA_DIR` below).
 
-On first run the corpus is downloaded from the Hugging Face dataset
-[`opendatalab/OHR-Bench`](https://huggingface.co/datasets/opendatalab/OHR-Bench)
-(`pdfs.zip`, ~1.5 GB, cached by `huggingface_hub`) and the PDFs are extracted
-flat into `data/`. If `data/` already contains PDFs the download is skipped.
+If `data/` has no PDFs, the corpus is downloaded first (see
+[docs/data.md](docs/data.md)). Files already in the collection are skipped.
 
-Indexing is incremental: files already present in the Chroma collection are
-skipped, so an interrupted run can simply be restarted.
-
-Useful options:
+Options:
 
 | Option | Effect |
 | --- | --- |
@@ -103,9 +97,7 @@ To only download the data: `uv run python -m ragsystem.utils.data_downloader`.
 ## Chatbot API
 
 A REST API that answers questions from the documents and returns the
-references it used. Retrieval uses the best method of the evaluation,
-**common first: embedding + sparse** (98.0% of the expected chunks in the top
-5 on the Claude test set):
+references it used. Retrieval method: `Common first: embedding + sparse`.
 
 1. The dense search (Qwen3 embedding, cosine) and the sparse search (SPLADE,
    dot product) each take their own top 10 chunks.
@@ -162,7 +154,7 @@ response):
 | --- | --- | --- |
 | `documents` | "And how did it compare to the previous year?" | Rewritten as a standalone question (`search_query`), then searched and answered with citations |
 | `chitchat` | "Hello", "What can you do?" | Short reply, no search |
-| `off_topic` | "Write a poem", "What is the capital of Australia?" | Polite refusal with example topics, no search |
+| `off_topic` | "Write a poem", "Write Python code" | Refusal with example topics, no search |
 
 The web interface sends the last 8 messages of the open conversation.
 
@@ -212,11 +204,10 @@ uv run python -m ragsystem.utils.generate_test_questions
 uv run python -m ragsystem.evaluation.evaluate_combinations --test-file test_data/groq_test_questions.jsonl
 ```
 
-Results are written to `results/`. Method and conclusions:
+Results are written to `results/` and reported in
 [docs/rag_evaluation.md](docs/rag_evaluation.md).
 
 ## Legacy Streamlit app
 
-`src/app/app.py` is the first chat interface. It uses the older BM25 + vector
-retriever and reads `./chroma_db`, so it does not work with the current index.
-Use the chat interface of the API instead.
+`src/app/app.py`: first chat interface, using the older BM25 + vector
+retriever and `./chroma_db`. It does not read the current index.
