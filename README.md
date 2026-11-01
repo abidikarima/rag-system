@@ -53,7 +53,7 @@ ragsystem
   chunked, embedded and stored.
 - [Test data](docs/test_data.md): how the retrieval test questions are
   generated, and their format.
-- [Evaluation](docs/rag_evaluation.md): results of 19 retrieval methods
+- [Evaluation](docs/rag_evaluation.md): results of 26 retrieval methods
   on the Claude and Groq test sets.
 
 ## Setup
@@ -200,7 +200,7 @@ commands, and it changes every time the tunnel restarts.
 # Generate a test set (Groq LLM, 300 questions)
 uv run python -m ragsystem.utils.generate_test_questions
 
-# Compare the 19 retrieval methods on a test set
+# Compare the 26 retrieval methods on a test set
 uv run python -m ragsystem.evaluation.evaluate_combinations --test-file test_data/groq_test_questions.jsonl
 ```
 

@@ -29,6 +29,7 @@ sets are described in [test_data.md](test_data.md).
 | Sparse | SPLADE sparse vector of the chunk text (dot product) |
 | Summary embedding | Qwen3 dense embedding of the chunk's LLM summary |
 | Summary sparse | SPLADE sparse vector of the chunk's LLM summary |
+| Keyword | BM25 keyword matching on the chunk text (`rank_bm25`, lowercased words and numbers) |
 
 ## Fusions
 
@@ -61,108 +62,143 @@ sets are described in [test_data.md](test_data.md).
 | Common first: all four | Embedding + Sparse + Summary embedding + Summary sparse | Common first |
 | RRF: embedding + sparse | Embedding + Sparse | RRF |
 | RRF: all four | Embedding + Sparse + Summary embedding + Summary sparse | RRF |
+| Keyword only (BM25) | Keyword | — |
+| Embedding + keyword | Embedding + Keyword | Score average |
+| Sparse + keyword | Sparse + Keyword | Score average |
+| Embedding + sparse + keyword | Embedding + Sparse + Keyword | Score average |
+| Common first: embedding + keyword | Embedding + Keyword | Common first |
+| Common first: embedding + sparse + keyword | Embedding + Sparse + Keyword | Common first |
+| RRF: embedding + sparse + keyword | Embedding + Sparse + Keyword | RRF |
 
 The API uses `Common first: embedding + sparse`.
 
 ## Results: Claude test set
 
-| Method                           | chunk@5 | chunk@10 |  doc@5 | doc@10 |   MRR |
-| -------------------------------- | ------: | -------: | -----: | -----: | ----: |
-| Embedding only                   |  95.33% |   97.67% | 97.67% | 98.33% | 0.862 |
-| Sparse only                      |  95.67% |   97.67% | 98.67% | 99.00% | 0.879 |
-| Summary embedding                |  90.00% |   93.33% | 96.67% | 98.33% | 0.800 |
-| Summary sparse                   |  91.33% |   94.67% | 96.00% | 97.00% | 0.798 |
-| Embedding + sparse               |  97.67% |   98.67% | 99.33% | 99.33% | 0.894 |
-| Summary embedding + sparse       |  91.00% |   95.00% | 97.67% | 98.00% | 0.823 |
-| Embedding + summary embedding    |  95.00% |   97.00% | 97.67% | 98.00% | 0.848 |
-| Sparse + summary sparse          |  97.33% |   98.00% | 99.33% | 99.33% | 0.881 |
-| Embedding + summary sparse       |  94.67% |   97.00% | 97.67% | 98.33% | 0.862 |
-| Sparse + summary embedding       |  97.33% |   98.33% | 99.33% | 99.33% | 0.884 |
-| All but summary sparse           |  97.67% |   98.33% | 99.00% | 99.00% | 0.885 |
-| All but summary embedding        |  97.33% |   98.00% | 99.33% | 99.33% | 0.897 |
-| All but sparse                   |  94.33% |   96.67% | 98.00% | 98.33% | 0.856 |
-| All but embedding                |  96.67% |   98.00% | 99.33% | 99.33% | 0.873 |
-| All four                         |  96.67% |   98.00% | 99.00% | 99.33% | 0.883 |
-| Common first: embedding + sparse |  98.00% |   98.67% | 99.33% | 99.33% | 0.891 |
-| Common first: all four           |  96.00% |   98.33% | 99.00% | 99.33% | 0.867 |
-| RRF: embedding + sparse          |  96.67% |   98.00% | 98.33% | 98.67% | 0.873 |
-| RRF: all four                    |  94.00% |   97.67% | 97.67% | 99.00% | 0.848 |
+| Method                                     | chunk@5 | chunk@10 |  doc@5 | doc@10 |   MRR |
+| ------------------------------------------ | ------: | -------: | -----: | -----: | ----: |
+| Embedding only                             |  95.33% |   97.67% | 97.67% | 98.33% | 0.862 |
+| Sparse only                                |  95.67% |   97.67% | 98.67% | 99.00% | 0.879 |
+| Summary embedding                          |  90.00% |   93.33% | 96.67% | 98.33% | 0.800 |
+| Summary sparse                             |  91.33% |   94.67% | 96.00% | 97.00% | 0.798 |
+| Embedding + sparse                         |  97.67% |   98.67% | 99.33% | 99.33% | 0.894 |
+| Summary embedding + sparse                 |  91.00% |   95.00% | 97.67% | 98.00% | 0.823 |
+| Embedding + summary embedding              |  95.00% |   97.00% | 97.67% | 98.00% | 0.848 |
+| Sparse + summary sparse                    |  97.33% |   98.00% | 99.33% | 99.33% | 0.881 |
+| Embedding + summary sparse                 |  94.67% |   97.00% | 97.67% | 98.33% | 0.862 |
+| Sparse + summary embedding                 |  97.33% |   98.33% | 99.33% | 99.33% | 0.884 |
+| All but summary sparse                     |  97.67% |   98.33% | 99.00% | 99.00% | 0.885 |
+| All but summary embedding                  |  97.33% |   98.00% | 99.33% | 99.33% | 0.897 |
+| All but sparse                             |  94.33% |   96.67% | 98.00% | 98.33% | 0.856 |
+| All but embedding                          |  96.67% |   98.00% | 99.33% | 99.33% | 0.873 |
+| All four                                   |  96.67% |   98.00% | 99.00% | 99.33% | 0.883 |
+| Common first: embedding + sparse           |  98.00% |   98.67% | 99.33% | 99.33% | 0.891 |
+| Common first: all four                     |  96.00% |   98.33% | 99.00% | 99.33% | 0.867 |
+| RRF: embedding + sparse                    |  96.67% |   98.00% | 98.33% | 98.67% | 0.873 |
+| RRF: all four                              |  94.00% |   97.67% | 97.67% | 99.00% | 0.848 |
+| Keyword only (BM25)                        |  93.00% |   95.00% | 97.67% | 97.67% | 0.840 |
+| Embedding + keyword                        |  96.67% |   98.00% | 98.67% | 99.00% | 0.893 |
+| Sparse + keyword                           |  95.00% |   96.67% | 99.00% | 99.00% | 0.884 |
+| Embedding + sparse + keyword               |  96.33% |   98.67% | 99.00% | 99.33% | 0.900 |
+| Common first: embedding + keyword          |  96.67% |   98.00% | 99.00% | 99.00% | 0.887 |
+| Common first: embedding + sparse + keyword |  96.67% |   98.67% | 99.00% | 99.33% | 0.895 |
+| RRF: embedding + sparse + keyword          |  94.67% |   97.67% | 98.00% | 99.33% | 0.884 |
 
 ### chunk@k by difficulty (Claude)
 
 100 questions per level.
 
-| Method                           | easy@5 | easy@10 | medium@5 | medium@10 |  hard@5 | hard@10 |
-| -------------------------------- | -----: | ------: | -------: | --------: | ------: | ------: |
-| Embedding only                   | 90.00% |  95.00% |   97.00% |    98.00% |  99.00% | 100.00% |
-| Sparse only                      | 95.00% |  97.00% |   96.00% |    97.00% |  96.00% |  99.00% |
-| Summary embedding                | 88.00% |  92.00% |   87.00% |    92.00% |  95.00% |  96.00% |
-| Summary sparse                   | 89.00% |  92.00% |   91.00% |    95.00% |  94.00% |  97.00% |
-| Embedding + sparse               | 96.00% |  98.00% |   98.00% |    98.00% |  99.00% | 100.00% |
-| Summary embedding + sparse       | 89.00% |  92.00% |   89.00% |    96.00% |  95.00% |  97.00% |
-| Embedding + summary embedding    | 91.00% |  94.00% |   97.00% |    98.00% |  97.00% |  99.00% |
-| Sparse + summary sparse          | 97.00% |  98.00% |   97.00% |    97.00% |  98.00% |  99.00% |
-| Embedding + summary sparse       | 93.00% |  95.00% |   94.00% |    97.00% |  97.00% |  99.00% |
-| Sparse + summary embedding       | 97.00% |  98.00% |   96.00% |    98.00% |  99.00% |  99.00% |
-| All but summary sparse           | 96.00% |  97.00% |   98.00% |    98.00% |  99.00% | 100.00% |
-| All but summary embedding        | 97.00% |  98.00% |   97.00% |    97.00% |  98.00% |  99.00% |
-| All but sparse                   | 93.00% |  95.00% |   95.00% |    97.00% |  95.00% |  98.00% |
-| All but embedding                | 97.00% |  98.00% |   97.00% |    97.00% |  96.00% |  99.00% |
-| All four                         | 96.00% |  98.00% |   96.00% |    97.00% |  98.00% |  99.00% |
-| Common first: embedding + sparse | 96.00% |  98.00% |   98.00% |    98.00% | 100.00% | 100.00% |
-| Common first: all four           | 96.00% |  98.00% |   96.00% |    97.00% |  96.00% | 100.00% |
-| RRF: embedding + sparse          | 93.00% |  96.00% |   98.00% |    98.00% |  99.00% | 100.00% |
-| RRF: all four                    | 91.00% |  97.00% |   95.00% |    97.00% |  96.00% |  99.00% |
+| Method                                     | easy@5 | easy@10 | medium@5 | medium@10 |  hard@5 | hard@10 |
+| ------------------------------------------ | -----: | ------: | -------: | --------: | ------: | ------: |
+| Embedding only                             | 90.00% |  95.00% |   97.00% |    98.00% |  99.00% | 100.00% |
+| Sparse only                                | 95.00% |  97.00% |   96.00% |    97.00% |  96.00% |  99.00% |
+| Summary embedding                          | 88.00% |  92.00% |   87.00% |    92.00% |  95.00% |  96.00% |
+| Summary sparse                             | 89.00% |  92.00% |   91.00% |    95.00% |  94.00% |  97.00% |
+| Embedding + sparse                         | 96.00% |  98.00% |   98.00% |    98.00% |  99.00% | 100.00% |
+| Summary embedding + sparse                 | 89.00% |  92.00% |   89.00% |    96.00% |  95.00% |  97.00% |
+| Embedding + summary embedding              | 91.00% |  94.00% |   97.00% |    98.00% |  97.00% |  99.00% |
+| Sparse + summary sparse                    | 97.00% |  98.00% |   97.00% |    97.00% |  98.00% |  99.00% |
+| Embedding + summary sparse                 | 93.00% |  95.00% |   94.00% |    97.00% |  97.00% |  99.00% |
+| Sparse + summary embedding                 | 97.00% |  98.00% |   96.00% |    98.00% |  99.00% |  99.00% |
+| All but summary sparse                     | 96.00% |  97.00% |   98.00% |    98.00% |  99.00% | 100.00% |
+| All but summary embedding                  | 97.00% |  98.00% |   97.00% |    97.00% |  98.00% |  99.00% |
+| All but sparse                             | 93.00% |  95.00% |   95.00% |    97.00% |  95.00% |  98.00% |
+| All but embedding                          | 97.00% |  98.00% |   97.00% |    97.00% |  96.00% |  99.00% |
+| All four                                   | 96.00% |  98.00% |   96.00% |    97.00% |  98.00% |  99.00% |
+| Common first: embedding + sparse           | 96.00% |  98.00% |   98.00% |    98.00% | 100.00% | 100.00% |
+| Common first: all four                     | 96.00% |  98.00% |   96.00% |    97.00% |  96.00% | 100.00% |
+| RRF: embedding + sparse                    | 93.00% |  96.00% |   98.00% |    98.00% |  99.00% | 100.00% |
+| RRF: all four                              | 91.00% |  97.00% |   95.00% |    97.00% |  96.00% |  99.00% |
+| Keyword only (BM25)                        | 92.00% |  94.00% |   94.00% |    95.00% |  93.00% |  96.00% |
+| Embedding + keyword                        | 96.00% |  96.00% |   96.00% |    98.00% |  98.00% | 100.00% |
+| Sparse + keyword                           | 94.00% |  97.00% |   95.00% |    96.00% |  96.00% |  97.00% |
+| Embedding + sparse + keyword               | 96.00% |  98.00% |   96.00% |    98.00% |  97.00% | 100.00% |
+| Common first: embedding + keyword          | 96.00% |  96.00% |   96.00% |    98.00% |  98.00% | 100.00% |
+| Common first: embedding + sparse + keyword | 97.00% |  98.00% |   95.00% |    98.00% |  98.00% | 100.00% |
+| RRF: embedding + sparse + keyword          | 93.00% |  97.00% |   95.00% |    98.00% |  96.00% |  98.00% |
 
 ## Results: Groq test set
 
-| Method                           | chunk@5 | chunk@10 |  doc@5 | doc@10 |   MRR |
-| -------------------------------- | ------: | -------: | -----: | -----: | ----: |
-| Embedding only                   |  93.33% |   95.33% | 94.33% | 96.00% | 0.862 |
-| Sparse only                      |  95.00% |   96.33% | 96.67% | 97.33% | 0.889 |
-| Summary embedding                |  88.67% |   91.67% | 92.67% | 95.00% | 0.792 |
-| Summary sparse                   |  87.67% |   91.67% | 92.00% | 95.33% | 0.801 |
-| Embedding + sparse               |  96.33% |   96.67% | 96.67% | 97.67% | 0.899 |
-| Summary embedding + sparse       |  90.33% |   92.67% | 94.00% | 96.33% | 0.824 |
-| Embedding + summary embedding    |  93.33% |   96.33% | 95.00% | 97.33% | 0.857 |
-| Sparse + summary sparse          |  94.67% |   96.67% | 96.33% | 97.33% | 0.889 |
-| Embedding + summary sparse       |  93.00% |   95.67% | 95.00% | 97.00% | 0.854 |
-| Sparse + summary embedding       |  96.33% |   97.33% | 97.33% | 98.33% | 0.898 |
-| All but summary sparse           |  96.33% |   97.33% | 97.00% | 98.00% | 0.902 |
-| All but summary embedding        |  95.67% |   97.33% | 96.33% | 98.00% | 0.903 |
-| All but sparse                   |  92.67% |   95.00% | 94.67% | 96.67% | 0.847 |
-| All but embedding                |  94.67% |   97.33% | 96.33% | 98.67% | 0.881 |
-| All four                         |  96.00% |   97.00% | 96.67% | 98.33% | 0.897 |
-| Common first: embedding + sparse |  96.33% |   97.33% | 96.67% | 97.67% | 0.891 |
-| Common first: all four           |  94.67% |   97.33% | 96.00% | 98.33% | 0.869 |
-| RRF: embedding + sparse          |  95.00% |   96.33% | 95.67% | 97.00% | 0.888 |
-| RRF: all four                    |  93.33% |   95.33% | 96.00% | 97.67% | 0.845 |
+| Method                                     | chunk@5 | chunk@10 |  doc@5 | doc@10 |   MRR |
+| ------------------------------------------ | ------: | -------: | -----: | -----: | ----: |
+| Embedding only                             |  93.33% |   95.33% | 94.33% | 96.00% | 0.862 |
+| Sparse only                                |  95.00% |   96.33% | 96.67% | 97.33% | 0.889 |
+| Summary embedding                          |  88.67% |   91.67% | 92.67% | 95.00% | 0.792 |
+| Summary sparse                             |  87.67% |   91.67% | 92.00% | 95.33% | 0.801 |
+| Embedding + sparse                         |  96.33% |   96.67% | 96.67% | 97.67% | 0.899 |
+| Summary embedding + sparse                 |  90.33% |   92.67% | 94.00% | 96.33% | 0.824 |
+| Embedding + summary embedding              |  93.33% |   96.33% | 95.00% | 97.33% | 0.857 |
+| Sparse + summary sparse                    |  94.67% |   96.67% | 96.33% | 97.33% | 0.889 |
+| Embedding + summary sparse                 |  93.00% |   95.67% | 95.00% | 97.00% | 0.854 |
+| Sparse + summary embedding                 |  96.33% |   97.33% | 97.33% | 98.33% | 0.898 |
+| All but summary sparse                     |  96.33% |   97.33% | 97.00% | 98.00% | 0.902 |
+| All but summary embedding                  |  95.67% |   97.33% | 96.33% | 98.00% | 0.903 |
+| All but sparse                             |  92.67% |   95.00% | 94.67% | 96.67% | 0.847 |
+| All but embedding                          |  94.67% |   97.33% | 96.33% | 98.67% | 0.881 |
+| All four                                   |  96.00% |   97.00% | 96.67% | 98.33% | 0.897 |
+| Common first: embedding + sparse           |  96.33% |   97.33% | 96.67% | 97.67% | 0.891 |
+| Common first: all four                     |  94.67% |   97.33% | 96.00% | 98.33% | 0.869 |
+| RRF: embedding + sparse                    |  95.00% |   96.33% | 95.67% | 97.00% | 0.888 |
+| RRF: all four                              |  93.33% |   95.33% | 96.00% | 97.67% | 0.845 |
+| Keyword only (BM25)                        |  89.67% |   91.33% | 92.33% | 94.00% | 0.815 |
+| Embedding + keyword                        |  96.00% |   97.00% | 96.67% | 97.67% | 0.882 |
+| Sparse + keyword                           |  95.67% |   96.67% | 96.67% | 97.00% | 0.869 |
+| Embedding + sparse + keyword               |  96.33% |   97.33% | 97.00% | 97.33% | 0.903 |
+| Common first: embedding + keyword          |  96.00% |   97.67% | 96.67% | 98.00% | 0.868 |
+| Common first: embedding + sparse + keyword |  96.33% |   97.67% | 97.00% | 97.67% | 0.887 |
+| RRF: embedding + sparse + keyword          |  95.33% |   97.00% | 96.67% | 97.00% | 0.873 |
 
 ### chunk@k by difficulty (Groq)
 
 100 questions per level.
 
-| Method                           | easy@5 | easy@10 | medium@5 | medium@10 | hard@5 | hard@10 |
-| -------------------------------- | -----: | ------: | -------: | --------: | -----: | ------: |
-| Embedding only                   | 91.00% |  95.00% |   95.00% |    96.00% | 94.00% |  95.00% |
-| Sparse only                      | 96.00% |  97.00% |   95.00% |    96.00% | 94.00% |  96.00% |
-| Summary embedding                | 85.00% |  88.00% |   91.00% |    92.00% | 90.00% |  95.00% |
-| Summary sparse                   | 86.00% |  91.00% |   88.00% |    93.00% | 89.00% |  91.00% |
-| Embedding + sparse               | 97.00% |  97.00% |   97.00% |    97.00% | 95.00% |  96.00% |
-| Summary embedding + sparse       | 89.00% |  90.00% |   91.00% |    93.00% | 91.00% |  95.00% |
-| Embedding + summary embedding    | 90.00% |  95.00% |   95.00% |    98.00% | 95.00% |  96.00% |
-| Sparse + summary sparse          | 94.00% |  97.00% |   96.00% |    98.00% | 94.00% |  95.00% |
-| Embedding + summary sparse       | 92.00% |  94.00% |   94.00% |    97.00% | 93.00% |  96.00% |
-| Sparse + summary embedding       | 96.00% |  96.00% |   98.00% |    98.00% | 95.00% |  98.00% |
-| All but summary sparse           | 95.00% |  97.00% |   98.00% |    98.00% | 96.00% |  97.00% |
-| All but summary embedding        | 94.00% |  97.00% |   98.00% |    98.00% | 95.00% |  97.00% |
-| All but sparse                   | 91.00% |  94.00% |   94.00% |    95.00% | 93.00% |  96.00% |
-| All but embedding                | 93.00% |  97.00% |   96.00% |    97.00% | 95.00% |  98.00% |
-| All four                         | 94.00% |  96.00% |   98.00% |    98.00% | 96.00% |  97.00% |
-| Common first: embedding + sparse | 96.00% |  98.00% |   97.00% |    98.00% | 96.00% |  96.00% |
-| Common first: all four           | 92.00% |  97.00% |   97.00% |    98.00% | 95.00% |  97.00% |
-| RRF: embedding + sparse          | 95.00% |  96.00% |   95.00% |    97.00% | 95.00% |  96.00% |
-| RRF: all four                    | 91.00% |  95.00% |   94.00% |    95.00% | 95.00% |  96.00% |
+| Method                                     | easy@5 | easy@10 | medium@5 | medium@10 | hard@5 | hard@10 |
+| ------------------------------------------ | -----: | ------: | -------: | --------: | -----: | ------: |
+| Embedding only                             | 91.00% |  95.00% |   95.00% |    96.00% | 94.00% |  95.00% |
+| Sparse only                                | 96.00% |  97.00% |   95.00% |    96.00% | 94.00% |  96.00% |
+| Summary embedding                          | 85.00% |  88.00% |   91.00% |    92.00% | 90.00% |  95.00% |
+| Summary sparse                             | 86.00% |  91.00% |   88.00% |    93.00% | 89.00% |  91.00% |
+| Embedding + sparse                         | 97.00% |  97.00% |   97.00% |    97.00% | 95.00% |  96.00% |
+| Summary embedding + sparse                 | 89.00% |  90.00% |   91.00% |    93.00% | 91.00% |  95.00% |
+| Embedding + summary embedding              | 90.00% |  95.00% |   95.00% |    98.00% | 95.00% |  96.00% |
+| Sparse + summary sparse                    | 94.00% |  97.00% |   96.00% |    98.00% | 94.00% |  95.00% |
+| Embedding + summary sparse                 | 92.00% |  94.00% |   94.00% |    97.00% | 93.00% |  96.00% |
+| Sparse + summary embedding                 | 96.00% |  96.00% |   98.00% |    98.00% | 95.00% |  98.00% |
+| All but summary sparse                     | 95.00% |  97.00% |   98.00% |    98.00% | 96.00% |  97.00% |
+| All but summary embedding                  | 94.00% |  97.00% |   98.00% |    98.00% | 95.00% |  97.00% |
+| All but sparse                             | 91.00% |  94.00% |   94.00% |    95.00% | 93.00% |  96.00% |
+| All but embedding                          | 93.00% |  97.00% |   96.00% |    97.00% | 95.00% |  98.00% |
+| All four                                   | 94.00% |  96.00% |   98.00% |    98.00% | 96.00% |  97.00% |
+| Common first: embedding + sparse           | 96.00% |  98.00% |   97.00% |    98.00% | 96.00% |  96.00% |
+| Common first: all four                     | 92.00% |  97.00% |   97.00% |    98.00% | 95.00% |  97.00% |
+| RRF: embedding + sparse                    | 95.00% |  96.00% |   95.00% |    97.00% | 95.00% |  96.00% |
+| RRF: all four                              | 91.00% |  95.00% |   94.00% |    95.00% | 95.00% |  96.00% |
+| Keyword only (BM25)                        | 96.00% |  98.00% |   87.00% |    88.00% | 86.00% |  88.00% |
+| Embedding + keyword                        | 98.00% |  99.00% |   95.00% |    96.00% | 95.00% |  96.00% |
+| Sparse + keyword                           | 98.00% |  99.00% |   95.00% |    95.00% | 94.00% |  96.00% |
+| Embedding + sparse + keyword               | 97.00% |  98.00% |   96.00% |    97.00% | 96.00% |  97.00% |
+| Common first: embedding + keyword          | 97.00% |  98.00% |   95.00% |    97.00% | 96.00% |  98.00% |
+| Common first: embedding + sparse + keyword | 97.00% |  98.00% |   96.00% |    97.00% | 96.00% |  98.00% |
+| RRF: embedding + sparse + keyword          | 97.00% |  99.00% |   95.00% |    96.00% | 94.00% |  96.00% |
 
 ## Test sets compared
 
